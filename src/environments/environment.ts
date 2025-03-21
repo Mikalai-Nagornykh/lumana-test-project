@@ -1,1 +1,5 @@
-export const environment = {};
+export const environment = {
+  baseApiUrl: 'https://api.spotify.com',
+  accountUrl: 'https://accounts.spotify.com',
+  production: true,
+};

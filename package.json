@@ -23,6 +23,7 @@
     "@ngrx/store": "^19.0.1",
     "@tailwindcss/postcss": "^4.0.14",
     "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.0.14",
     "tslib": "^2.3.0",
