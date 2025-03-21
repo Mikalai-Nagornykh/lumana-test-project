@@ -19,9 +19,11 @@
     "target": "ES2022",
     "module": "ES2022",
     "paths": {
+      "@environments": ["environments/environment.development"],
       "@models": ["app/models/index"],
       "@services": ["app/services/index"],
-      "@constants": ["app/constants/index"]
+      "@constants": ["app/constants/index"],
+      "@auth": ["app/core/auth/index"]
     }
   },
   "angularCompilerOptions": {

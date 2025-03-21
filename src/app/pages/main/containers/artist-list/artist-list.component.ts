@@ -12,9 +12,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ArtistModel } from '../../../../models/artist.model';
+import { ArtistModel } from '@models';
 
-import { ArtistService } from '../../../../services/api/artist.service';
+import { ArtistService } from '@services';
 import { MATRIX_BREAKPOINTS } from '../../constants/virtuall-scroll-matrix-breakpoints.const';
 import { ArtistCardComponent } from '../../ui/artist-card/artist-card.component';
 
@@ -30,17 +30,16 @@ export default class ArtistListComponent {
 
   private heroesService = inject(ArtistService);
 
-  protected readonly heroes = toSignal(this.heroesService.getArtists());
+  protected readonly artists = toSignal(this.heroesService.getArtists());
 
   protected artistsMatrix = signal<ArtistModel[][]>([]);
 
   constructor() {
     effect(() => {
-      const heroes = this.heroes()?.items;
-      console.log(this.heroes());
-      if (heroes) {
+      const artists = this.artists()?.items;
+      if (artists) {
         untracked(() => {
-          this.artistsMatrix.set(this.changeMatrixSizes(heroes, 5));
+          this.artistsMatrix.set(this.changeMatrixSizes(artists, 5));
         });
       }
     });
@@ -78,7 +77,7 @@ export default class ArtistListComponent {
         if (breakpoint) {
           this.artistsMatrix.set(
             this.changeMatrixSizes(
-              this.heroes()?.items ?? [],
+              this.artists()?.items ?? [],
               breakpoint.columns,
             ),
           );
