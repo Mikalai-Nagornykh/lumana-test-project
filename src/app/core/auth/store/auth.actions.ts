@@ -1,12 +1,14 @@
-import { createActionGroup } from '@ngrx/store';
-import { TokenRequestModel, TokenResponseModel } from '../models';
+import { createActionGroup, emptyProps } from '@ngrx/store';
+import { TokenResponseModel } from '../models';
 
 export const AuthActions = createActionGroup({
   source: 'Auth',
   events: {
-    'Get Access Token': (payload: TokenRequestModel) => ({ payload }),
-    'Get Access Token Success': (response: TokenResponseModel) => ({
+    getAccessToken: emptyProps(),
+    getAccessTokenSuccess: (response: TokenResponseModel) => ({
       response,
     }),
+    refreshAccessToken: emptyProps(),
+    refreshAccessTokenSuccess: (response: TokenResponseModel) => ({ response }),
   },
 });

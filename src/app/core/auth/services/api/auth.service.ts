@@ -1,6 +1,11 @@
 import { HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { ACCOUNT_API_URL_TOKEN, BaseApiService } from '@services';
+import {
+  ACCOUNT_API_URL_TOKEN,
+  BaseApiService,
+  CLIENT_ID_TOKEN,
+  CLIENT_SECRET_TOKEN,
+} from '@services';
 import { Observable } from 'rxjs';
 import { TokenRequestModel, TokenResponseModel } from '../../models';
 
@@ -9,11 +14,12 @@ import { TokenRequestModel, TokenResponseModel } from '../../models';
 })
 export class AuthService extends BaseApiService {
   private accountUrl = inject(ACCOUNT_API_URL_TOKEN);
+  private clientId = inject(CLIENT_ID_TOKEN);
+  private clientSecret = inject(CLIENT_SECRET_TOKEN);
 
-  getAccessToken(payload: TokenRequestModel): Observable<TokenResponseModel> {
+  getAccessToken(): Observable<TokenResponseModel> {
     const headers = new HttpHeaders({
-      Authorization:
-        'Basic ' + btoa(`${payload.client_id}:${payload.client_secret}`),
+      Authorization: 'Basic ' + btoa(`${this.clientId}:${this.clientSecret}`),
       'Content-Type': 'application/x-www-form-urlencoded',
     });
 
@@ -28,4 +34,6 @@ export class AuthService extends BaseApiService {
       },
     );
   }
+
+  private refreshToken() {}
 }
