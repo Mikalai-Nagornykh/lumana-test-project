@@ -20,12 +20,13 @@ import { LoadingType } from '@constants';
 import { ArtistModel } from '@models';
 import { Store } from '@ngrx/store';
 import { LoadingSelectors, LoadingState } from '@store';
-import { debounceTime } from 'rxjs';
+import { debounceTime, startWith, Subject } from 'rxjs';
 import { MATRIX_BREAKPOINTS } from '../../constants/virtuall-scroll-matrix-breakpoints.const';
 import { ArtistsActions } from '../../store/artists.actions';
 import { ArtistsState } from '../../store/artists.reducers';
 import { ArtistsSelectors } from '../../store/artists.selectors';
 import { ArtistCardComponent } from '../../ui/artist-card/artist-card.component';
+import { AutocompleteSearchComponent } from '../../ui/autocomplete-search/autocomplete-search.component';
 
 @Component({
   selector: 'app-artist-list',
@@ -34,6 +35,7 @@ import { ArtistCardComponent } from '../../ui/artist-card/artist-card.component'
     ReactiveFormsModule,
     ArtistCardComponent,
     NgTemplateOutlet,
+    AutocompleteSearchComponent,
   ],
   templateUrl: './artist-list.component.html',
   styleUrl: './artist-list.component.scss',
@@ -42,8 +44,8 @@ import { ArtistCardComponent } from '../../ui/artist-card/artist-card.component'
 export default class ArtistListComponent implements OnInit {
   private virtualScrollViewport = viewChild(CdkVirtualScrollViewport);
 
-  private artistsStore = inject(Store<ArtistsState>);
-  private loadingStore = inject(Store<LoadingState>);
+  private artistsStore = inject<Store<ArtistsState>>(Store<ArtistsState>);
+  private loadingStore = inject<Store<LoadingState>>(Store<LoadingState>);
 
   protected readonly artists = toSignal(
     this.artistsStore.select(ArtistsSelectors.selectAllArtists),
@@ -55,8 +57,12 @@ export default class ArtistListComponent implements OnInit {
     ),
   );
 
-  protected searchControl = new FormControl<string>('');
-  protected artistsMatrix = signal<ArtistModel[][]>([]);
+  protected readonly searchControl = new FormControl<string | null>(null);
+  protected readonly artistsMatrix = signal<ArtistModel[][]>([]);
+
+  protected readonly Array = Array;
+
+  private scrollSubject = new Subject<number>();
 
   private destroyRef = inject(DestroyRef);
 
@@ -81,8 +87,16 @@ export default class ArtistListComponent implements OnInit {
   ngOnInit() {
     this.artistsStore.dispatch(ArtistsActions.getArtists());
 
+    this.scrollSubject.pipe(debounceTime(300)).subscribe((index) => {
+      this.nextBatch(index);
+    });
+
     this.searchControl.valueChanges
-      .pipe(debounceTime(500), takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        startWith(this.searchControl.value),
+        debounceTime(500),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((value) => {
         this.artistsStore.dispatch(
           ArtistsActions.setFilterOptions({ search: value }),
@@ -94,10 +108,16 @@ export default class ArtistListComponent implements OnInit {
     return index;
   }
 
-  protected nextBatch(index: number): void {
+  protected onScroll(index: number): void {
+    this.scrollSubject.next(index);
+  }
+
+  private nextBatch(index: number): void {
     const total = this.virtualScrollViewport()?.getDataLength() ?? 0;
-    if (index > total / 1.9) {
-      console.log('true');
+    const threshold = total * 0.8;
+
+    if (index > threshold) {
+      this.artistsStore.dispatch(ArtistsActions.loadMoreArtists());
     }
   }
 
@@ -131,6 +151,4 @@ export default class ArtistListComponent implements OnInit {
       movies.slice(i * size, (i + 1) * size),
     );
   }
-
-  protected readonly Array = Array;
 }

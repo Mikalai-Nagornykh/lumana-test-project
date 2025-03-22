@@ -19,7 +19,7 @@ export class ArtistService extends BaseApiService {
   ): Observable<PaginationResult<ArtistModel>> {
     const params = new HttpParams()
       .set('type', 'artist')
-      .set('q', `artist:${filterOptions?.search}`)
+      .set('q', `artist:${filterOptions?.search ?? ''}`)
       .set('limit', loadOptions.limit.toString())
       .set('offset', loadOptions.offset.toString());
 

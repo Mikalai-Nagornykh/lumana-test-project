@@ -15,12 +15,10 @@ export const ArtistsActions = createActionGroup({
       paginationResult,
     }),
     getArtistsError: (error: HttpErrorResponse) => ({ error }),
-    setLoadOptions: (loadOptions: LoadOptionsModel) => ({
-      loadOptions,
-    }),
     setFilterOptions: (filterOptions: FilterOptionsModel) => ({
       filterOptions,
     }),
+    loadMoreArtists: emptyProps(),
   },
 });
 

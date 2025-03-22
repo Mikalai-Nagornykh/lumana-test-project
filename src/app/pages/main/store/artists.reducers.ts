@@ -19,12 +19,21 @@ export const artistsEntityAdapter: EntityAdapter<ArtistModel> =
     selectId: (artist) => artist.id,
   });
 
+const initialLoadOptions: LoadOptionsModel = {
+  limit: 50,
+  offset: 1,
+};
+
 const initialState: ArtistsState = artistsEntityAdapter.getInitialState({
-  meta: null,
-  loadOptions: {
-    limit: 50,
-    offset: 1,
+  meta: {
+    limit: 0,
+    offset: 0,
+    total: 0,
+    href: '',
+    next: null,
+    previous: null,
   },
+  loadOptions: initialLoadOptions,
   filterOptions: null,
   entities: [],
 });
@@ -32,17 +41,22 @@ const initialState: ArtistsState = artistsEntityAdapter.getInitialState({
 export const artistsReducer = createReducer(
   initialState,
   on(ArtistsActions.getArtistsSuccess, (state, { paginationResult }) =>
-    artistsEntityAdapter.setAll(paginationResult.items, {
+    artistsEntityAdapter.addMany(paginationResult.items, {
       ...state,
-      meta: paginationResult.meta,
+      meta: {
+        limit: paginationResult.limit,
+        offset: paginationResult.offset,
+        total: paginationResult.total,
+        href: paginationResult.href,
+        next: paginationResult.next,
+        previous: paginationResult.previous,
+      },
     }),
   ),
-  on(ArtistsActions.setLoadOptions, (state, { loadOptions }) => ({
-    ...state,
-    loadOptions,
-  })),
-  on(ArtistsActions.setFilterOptions, (state, { filterOptions }) => ({
-    ...state,
-    filterOptions,
-  })),
+  on(ArtistsActions.setFilterOptions, (state, { filterOptions }) =>
+    artistsEntityAdapter.removeAll({
+      ...state,
+      filterOptions,
+    }),
+  ),
 );

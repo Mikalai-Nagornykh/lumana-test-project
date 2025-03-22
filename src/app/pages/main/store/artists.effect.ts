@@ -1,11 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { LoadingType } from '@constants';
+import { LoadOptionsModel } from '@models';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import { Store } from '@ngrx/store';
 import { ArtistService } from '@services';
-import { map, switchMap } from 'rxjs';
-import { LoadingActions } from '../../../store/loading/loading.actions';
+import { LoadingActions } from '@store';
+import { filter, map, switchMap } from 'rxjs';
 
 import { ArtistsActions } from './artists.actions';
 import { ArtistsState } from './artists.reducers';
@@ -13,20 +14,16 @@ import { ArtistsSelectors } from './artists.selectors';
 
 @Injectable()
 export class ArtistsEffect {
-  private store = inject(Store<ArtistsState>);
+  private artistsStore = inject<Store<ArtistsState>>(Store<ArtistsState>);
   private actions = inject(Actions);
   private artistService = inject(ArtistService);
 
   getArtists = createEffect(() =>
     this.actions.pipe(
-      ofType(
-        ArtistsActions.getArtists,
-        ArtistsActions.setLoadOptions,
-        ArtistsActions.setFilterOptions,
-      ),
+      ofType(ArtistsActions.getArtists, ArtistsActions.setFilterOptions),
       concatLatestFrom(() => [
-        this.store.select(ArtistsSelectors.selectLoadOptions),
-        this.store.select(ArtistsSelectors.selectFilterOptions),
+        this.artistsStore.select(ArtistsSelectors.selectLoadOptions),
+        this.artistsStore.select(ArtistsSelectors.selectFilterOptions),
       ]),
       switchMap(([, loadOptions, filterOptions]) =>
         this.artistService
@@ -36,9 +33,34 @@ export class ArtistsEffect {
     ),
   );
 
+  loadMoreArtists = createEffect(() =>
+    this.actions.pipe(
+      ofType(ArtistsActions.loadMoreArtists),
+      concatLatestFrom(() => [
+        this.artistsStore
+          .select(ArtistsSelectors.selectMeta)
+          .pipe(filter(Boolean)),
+        this.artistsStore.select(ArtistsSelectors.selectFilterOptions),
+      ]),
+      switchMap(([, meta, filterOptions]) => {
+        const loadOptions: LoadOptionsModel = {
+          limit: meta.limit,
+          offset: meta.offset + meta.limit,
+        };
+        return this.artistService
+          .getArtists(loadOptions, filterOptions)
+          .pipe(map((response) => ArtistsActions.getArtistsSuccess(response)));
+      }),
+    ),
+  );
+
   addLoading = createEffect(() =>
     this.actions.pipe(
-      ofType(ArtistsActions.setFilterOptions, ArtistsActions.getArtists),
+      ofType(
+        ArtistsActions.setFilterOptions,
+        ArtistsActions.getArtists,
+        ArtistsActions.loadMoreArtists,
+      ),
       map(() => {
         return LoadingActions.addLoading(LoadingType.ARTISTS_LIST);
       }),
