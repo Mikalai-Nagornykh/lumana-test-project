@@ -1,10 +1,16 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  isDevMode,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { applyTokenInterceptor, AuthEffects } from '@auth';
 import { environment } from '@environments';
 import { provideEffects } from '@ngrx/effects';
 import { provideStore } from '@ngrx/store';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
+
 import {
   ACCOUNT_API_URL_TOKEN,
   BASE_API_URL_TOKEN,
@@ -13,14 +19,17 @@ import {
 } from '@services';
 
 import { routes } from './app.routes';
+import { appReducers } from './app.state';
+import { ArtistsEffect } from './pages/main/store/artists.effect';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([applyTokenInterceptor])),
-    provideStore(),
-    provideEffects([AuthEffects]),
+    provideStore(appReducers),
+    provideEffects([AuthEffects, ArtistsEffect]),
+    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     {
       provide: BASE_API_URL_TOKEN,
       useValue: environment.baseApiUrl,

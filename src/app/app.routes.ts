@@ -4,11 +4,11 @@ import mainRoutes from './pages/main/main.routes';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'heroes',
+    redirectTo: 'artists',
     pathMatch: 'full',
   },
   {
-    path: 'heroes',
+    path: 'artists',
     loadChildren: () => mainRoutes,
   },
 ];

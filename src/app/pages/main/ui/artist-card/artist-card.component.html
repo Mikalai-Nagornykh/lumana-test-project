@@ -1,12 +1,23 @@
 <div
   class="flex flex-col bg-[#2e3338] text-white rounded-2xl shadow-lg p-4 w-68 h-96 transition-all duration-300 hover:cursor-pointer hover:shadow-xl hover:ring-2 hover:ring-[#58a6ff] hover:scale-102">
+  @if (loading()) {
+    <div *ngTemplateOutlet="skeletonView"></div>
+  } @else {
+    <div *ngTemplateOutlet="defaultView"></div>
+  }
+</div>
+
+<ng-template #defaultView>
   <img
-    [src]="artist().images[0].url"
+    [src]="artist().images[0]?.url || 'favicon.ico'"
     [alt]="artist().name"
     class="w-full h-48 object-cover rounded-lg" />
-
   <div class="mt-3">
-    <h2 class="text-xl font-bold text-center">{{ artist().name }}</h2>
+    <h2
+      class="text-xl font-bold text-center overflow-hidden whitespace-nowrap text-ellipsis"
+      [title]="artist().name">
+      {{ artist().name }}
+    </h2>
     <p class="text-sm text-gray-400 text-center">
       <span class="font-semibold">Followers:</span>
       {{ artist().followers.total | number }}
@@ -15,9 +26,8 @@
       <span class="font-semibold">Popularity:</span> {{ artist().popularity }}
     </p>
   </div>
-
   <div class="mt-4 text-xs text-gray-300">
-    <p>
+    <p class="line-clamp-3">
       <span class="font-semibold">Genres: </span>
       {{
         artist().genres.length > 0
@@ -28,11 +38,23 @@
     <p>
       <span class="font-semibold">Spotify Link: </span>
       <a
-        [href]="artist().external_urls.spotify "
+        [href]="artist().external_urls.spotify"
         target="_blank"
         class="text-blue-400"
         >View on Spotify</a
       >
     </p>
   </div>
-</div>
+</ng-template>
+
+<ng-template #skeletonView>
+  <div class="w-full h-48 bg-gray-700 animate-pulse rounded-lg"></div>
+  <div class="mt-3">
+    <div class="h-5 w-3/4 mx-auto bg-gray-700 animate-pulse rounded"></div>
+    <div class="mt-2 h-4 w-1/2 mx-auto bg-gray-700 animate-pulse rounded"></div>
+  </div>
+  <div class="mt-4 space-y-2">
+    <div class="h-3 w-full bg-gray-700 animate-pulse rounded"></div>
+    <div class="h-3 w-2/3 bg-gray-700 animate-pulse rounded"></div>
+  </div>
+</ng-template>

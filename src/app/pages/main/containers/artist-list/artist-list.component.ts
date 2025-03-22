@@ -2,41 +2,67 @@ import {
   CdkVirtualScrollViewport,
   ScrollingModule,
 } from '@angular/cdk/scrolling';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   effect,
   inject,
+  OnInit,
   signal,
   untracked,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { LoadingType } from '@constants';
 import { ArtistModel } from '@models';
-
-import { ArtistService } from '@services';
+import { Store } from '@ngrx/store';
+import { LoadingSelectors, LoadingState } from '@store';
+import { debounceTime } from 'rxjs';
 import { MATRIX_BREAKPOINTS } from '../../constants/virtuall-scroll-matrix-breakpoints.const';
+import { ArtistsActions } from '../../store/artists.actions';
+import { ArtistsState } from '../../store/artists.reducers';
+import { ArtistsSelectors } from '../../store/artists.selectors';
 import { ArtistCardComponent } from '../../ui/artist-card/artist-card.component';
 
 @Component({
   selector: 'app-artist-list',
-  imports: [ArtistCardComponent, ScrollingModule],
+  imports: [
+    ScrollingModule,
+    ReactiveFormsModule,
+    ArtistCardComponent,
+    NgTemplateOutlet,
+  ],
   templateUrl: './artist-list.component.html',
   styleUrl: './artist-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class ArtistListComponent {
+export default class ArtistListComponent implements OnInit {
   private virtualScrollViewport = viewChild(CdkVirtualScrollViewport);
 
-  private heroesService = inject(ArtistService);
+  private artistsStore = inject(Store<ArtistsState>);
+  private loadingStore = inject(Store<LoadingState>);
 
-  protected readonly artists = toSignal(this.heroesService.getArtists());
+  protected readonly artists = toSignal(
+    this.artistsStore.select(ArtistsSelectors.selectAllArtists),
+  );
 
+  protected readonly loading = toSignal(
+    this.loadingStore.select(LoadingSelectors.selectLoading, {
+      type: LoadingType.ARTISTS_LIST,
+    }),
+  );
+
+  protected searchControl = new FormControl<string>('');
   protected artistsMatrix = signal<ArtistModel[][]>([]);
+
+  private destroyRef = inject(DestroyRef);
 
   constructor() {
     effect(() => {
-      const artists = this.artists()?.items;
+      const artists = this.artists();
       if (artists) {
         untracked(() => {
           this.artistsMatrix.set(this.changeMatrixSizes(artists, 5));
@@ -52,7 +78,19 @@ export default class ArtistListComponent {
     });
   }
 
-  public trackByIndex(index: number): number {
+  ngOnInit() {
+    this.artistsStore.dispatch(ArtistsActions.getArtists());
+
+    this.searchControl.valueChanges
+      .pipe(debounceTime(500), takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        this.artistsStore.dispatch(
+          ArtistsActions.setFilterOptions({ search: value }),
+        );
+      });
+  }
+
+  protected trackByIndex(index: number): number {
     return index;
   }
 
@@ -76,10 +114,7 @@ export default class ArtistListComponent {
 
         if (breakpoint) {
           this.artistsMatrix.set(
-            this.changeMatrixSizes(
-              this.artists()?.items ?? [],
-              breakpoint.columns,
-            ),
+            this.changeMatrixSizes(this.artists() ?? [], breakpoint.columns),
           );
         }
       }
@@ -96,4 +131,6 @@ export default class ArtistListComponent {
       movies.slice(i * size, (i + 1) * size),
     );
   }
+
+  protected readonly Array = Array;
 }

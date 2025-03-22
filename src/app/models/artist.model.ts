@@ -9,24 +9,12 @@ export type ArtistModel = {
   external_urls: {
     spotify: string;
   };
-  images: {
-    url: string;
-    height: number;
-    width: number;
-  }[];
+  images: ArtistImage[];
   type: string;
 };
 
-export interface CommonPaginationResponse<T> {
-  info: Info;
-  items: T[];
-}
-
-export interface Info {
-  href: string;
-  limit: number;
-  next: string | null;
-  offset: number;
-  previous: string | null;
-  total: number;
-}
+type ArtistImage = {
+  url: string | undefined;
+  height: number;
+  width: number;
+};

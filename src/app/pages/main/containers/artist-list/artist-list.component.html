@@ -4,22 +4,45 @@
       type="text"
       id="floating_outlined"
       class="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent rounded-lg border-1 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-      placeholder=" " />
+      [formControl]="searchControl"/>
     <label
       for="floating_outlined"
       class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
       >Floating outlined</label
     >
   </div>
-  <cdk-virtual-scroll-viewport
-    itemSize="360"
-    (scrolledIndexChange)="nextBatch($event)">
-    <div
-      *cdkVirtualFor="let row of artistsMatrix(); trackBy: trackByIndex"
-      class="flex gap-5 mt-5">
-      @for (artist of row; track $index) {
-        <app-artist-card [artist]="artist"></app-artist-card>
-      }
-    </div>
-  </cdk-virtual-scroll-viewport>
+
+  @if (artists()?.length) {
+    <cdk-virtual-scroll-viewport
+      itemSize="360"
+      (scrolledIndexChange)="nextBatch($event)">
+      <div
+        *cdkVirtualFor="let row of artistsMatrix(); trackBy: trackByIndex"
+        class="flex gap-5 mt-5">
+        @for (artist of row; track $index) {
+          <app-artist-card
+            [artist]="artist"
+            [loading]="loading()"></app-artist-card>
+        }
+      </div>
+    </cdk-virtual-scroll-viewport>
+  } @else {
+    <ng-container *ngTemplateOutlet="emptyList"></ng-container>
+  }
+
 </div>
+
+<ng-template #emptyList>
+  <div class="flex items-center justify-center h-full p-4">
+    <div
+      class="flex flex-col items-center justify-center p-8 border border-gray-600 rounded-lg shadow-lg bg-gray-800 text-center transition-transform transform hover:scale-105">
+      <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 9h18M3 15h18M3 21h18"/>
+      </svg>
+      <h2 class="text-2xl font-semibold text-white">No Artists Found</h2>
+      <p class="mt-2 text-gray-400">It seems there are no artists available at the moment.</p>
+    </div>
+  </div>
+</ng-template>
+
+

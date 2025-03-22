@@ -1,0 +1,32 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  ArtistModel,
+  FilterOptionsModel,
+  LoadOptionsModel,
+  PaginationResult,
+} from '@models';
+import { createActionGroup, emptyProps } from '@ngrx/store';
+
+export const ArtistsActions = createActionGroup({
+  source: 'Artists Page',
+  events: {
+    getArtists: emptyProps(),
+    getArtistsSuccess: (paginationResult: PaginationResult<ArtistModel>) => ({
+      paginationResult,
+    }),
+    getArtistsError: (error: HttpErrorResponse) => ({ error }),
+    setLoadOptions: (loadOptions: LoadOptionsModel) => ({
+      loadOptions,
+    }),
+    setFilterOptions: (filterOptions: FilterOptionsModel) => ({
+      filterOptions,
+    }),
+  },
+});
+
+export const ArtistActions = createActionGroup({
+  source: 'Artist Page',
+  events: {
+    getArtist: (id: string) => ({ id }),
+  },
+});
