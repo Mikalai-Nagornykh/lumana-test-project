@@ -8,43 +8,47 @@
 </div>
 
 <ng-template #defaultView>
-  <img
-    [src]="artist().images[0]?.url || 'favicon.ico'"
-    [alt]="artist().name"
-    class="w-full h-48 object-cover rounded-lg" />
-  <div class="mt-3">
-    <h2
-      class="text-xl font-bold text-center overflow-hidden whitespace-nowrap text-ellipsis"
-      [title]="artist().name">
-      {{ artist().name }}
-    </h2>
-    <p class="text-sm text-gray-400 text-center">
-      <span class="font-semibold">Followers:</span>
-      {{ artist().followers.total | number }}
-    </p>
-    <p class="mt-2 text-sm text-center">
-      <span class="font-semibold">Popularity:</span> {{ artist().popularity }}
-    </p>
-  </div>
-  <div class="mt-4 text-xs text-gray-300">
-    <p class="line-clamp-3">
-      <span class="font-semibold">Genres: </span>
-      {{
-        artist().genres.length > 0
-          ? artist().genres.join(', ')
-          : 'No genres available'
-      }}
-    </p>
-    <p>
-      <span class="font-semibold">Spotify Link: </span>
-      <a
-        [href]="artist().external_urls.spotify"
-        target="_blank"
-        class="text-blue-400"
-        >View on Spotify</a
-      >
-    </p>
-  </div>
+  @let artistModel = artist();
+  @if (artistModel) {
+    <img
+      [src]="artistModel.images[0]?.url || 'favicon.ico'"
+      [alt]="artistModel.name"
+      class="w-full h-48 object-cover rounded-lg" />
+    <div class="mt-3">
+      <h2
+        class="text-xl font-bold text-center overflow-hidden whitespace-nowrap text-ellipsis"
+        [title]="artistModel.name">
+        {{ artistModel.name }}
+      </h2>
+      <p class="text-sm text-gray-400 text-center">
+        <span class="font-semibold">Followers:</span>
+        {{ artistModel.followers.total | number }}
+      </p>
+      <p class="mt-2 text-sm text-center">
+        <span class="font-semibold">Popularity:</span>
+        {{ artistModel.popularity }}
+      </p>
+    </div>
+    <div class="mt-4 text-xs text-gray-300">
+      <p class="line-clamp-3">
+        <span class="font-semibold">Genres: </span>
+        {{
+          artistModel.genres.length > 0
+            ? artistModel.genres.join(', ')
+            : 'No genres available'
+        }}
+      </p>
+      <p>
+        <span class="font-semibold">Spotify Link: </span>
+        <a
+          [href]="artistModel.external_urls.spotify"
+          target="_blank"
+          class="text-blue-400"
+          >View on Spotify</a
+        >
+      </p>
+    </div>
+  }
 </ng-template>
 
 <ng-template #skeletonView>

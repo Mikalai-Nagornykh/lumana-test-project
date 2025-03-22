@@ -12,7 +12,9 @@
     >
   </div>
 
-  @if (artists()?.length) {
+  @let artistsLength = artists()?.length || 0;
+
+  @if (artistsLength) {
     <cdk-virtual-scroll-viewport
       itemSize="360"
       (scrolledIndexChange)="nextBatch($event)">
@@ -22,12 +24,22 @@
         @for (artist of row; track $index) {
           <app-artist-card
             [artist]="artist"
-            [loading]="loading()"></app-artist-card>
+            [loading]="loading() ?? false"></app-artist-card>
         }
       </div>
     </cdk-virtual-scroll-viewport>
-  } @else {
-    <ng-container *ngTemplateOutlet="emptyList"></ng-container>
+  }
+
+  @if (loading() && !artistsLength) {
+    <div class="flex flex-wrap gap-5">
+      @for (_ of Array(8); track $index) {
+        <app-artist-card [artist]="null" [loading]="true"></app-artist-card>
+      }
+    </div>
+  }
+
+  @if (!loading() && !artistsLength) {
+    <div *ngTemplateOutlet="emptyList"></div>
   }
 </div>
 

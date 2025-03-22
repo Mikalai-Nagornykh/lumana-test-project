@@ -50,9 +50,9 @@ export default class ArtistListComponent implements OnInit {
   );
 
   protected readonly loading = toSignal(
-    this.loadingStore.select(LoadingSelectors.selectLoading, {
-      type: LoadingType.ARTISTS_LIST,
-    }),
+    this.loadingStore.select(
+      LoadingSelectors.selectLoadingByType(LoadingType.ARTISTS_LIST),
+    ),
   );
 
   protected searchControl = new FormControl<string>('');

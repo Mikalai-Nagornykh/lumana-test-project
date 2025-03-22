@@ -9,11 +9,8 @@ export const selectLoadingTypes = createSelector(
   (state: LoadingState) => state.types,
 );
 
-export const selectLoading = createSelector(
-  selectLoadingTypes,
-  (types: LoadingType[], props: { type: LoadingType }) =>
-    types.includes(props.type),
-);
+export const selectLoadingByType = (type: LoadingType) =>
+  createSelector(selectLoadingTypes, (types) => types.includes(type));
 
 export const selectInRequest = createSelector(
   loadingFeatureSelector,
@@ -21,6 +18,6 @@ export const selectInRequest = createSelector(
 );
 
 export const LoadingSelectors = {
-  selectLoading,
+  selectLoadingByType,
   selectInRequest,
 };

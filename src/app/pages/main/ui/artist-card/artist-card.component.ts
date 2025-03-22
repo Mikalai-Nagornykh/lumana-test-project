@@ -9,6 +9,6 @@ import { ArtistModel } from '@models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArtistCardComponent {
-  readonly artist = input.required<ArtistModel>();
-  readonly loading = input<any>(false);
+  readonly artist = input.required<ArtistModel | null>();
+  readonly loading = input<boolean>(false);
 }
