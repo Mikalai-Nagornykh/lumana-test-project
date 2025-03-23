@@ -187,12 +187,9 @@ export class CanvasHelper {
   }
 
   private setCanvasScale(): void {
-    this.scale = window.devicePixelRatio || 1;
-    const { clientWidth, clientHeight } = this.canvas;
-
-    this.canvas.width = clientWidth * this.scale;
-    this.canvas.height = clientHeight * this.scale;
-
-    this.context.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+    const scale = window.devicePixelRatio || 1;
+    this.canvas.width = this.canvas.clientWidth * scale;
+    this.canvas.height = this.canvas.clientHeight * scale;
+    this.context.scale(scale, scale);
   }
 }

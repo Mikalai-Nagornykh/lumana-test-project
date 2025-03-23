@@ -1,5 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { SelectedPolygonsModel } from '../models/selected-polygons.model';
+import { Polygon } from '../utils/classes/canvas-polygon.class';
 import {
   artistsEntityAdapter,
   artistsFeatureKey,
@@ -20,10 +21,21 @@ export const selectSelectedArtist = createSelector(
     state.selectedArtistId ? state.entities[state.selectedArtistId] : null,
 );
 
-export const selectPolygons = createSelector(
+export const selectAllPolygons = createSelector(
   selectArtistsFeature,
   (state) => state.selectedPolygons,
 );
+
+export const selectPolygonsBySelectedArtist = (artistId: string) =>
+  createSelector(
+    selectAllPolygons,
+    (selectedPolygons: SelectedPolygonsModel[]): Polygon[] => {
+      return selectedPolygons
+        .filter((sp) => sp.artistId === artistId)
+        .map((selectedPolygons) => selectedPolygons.polygons)
+        .flat() as Polygon[];
+    },
+  );
 
 export const selectLoadOptions = createSelector(
   selectArtistsFeature,
@@ -46,5 +58,6 @@ export const ArtistsSelectors = {
   selectFilterOptions,
   selectMeta,
   selectSelectedArtist,
-  selectPolygons,
+  selectAllPolygons,
+  selectPolygonsBySelectedArtist,
 };

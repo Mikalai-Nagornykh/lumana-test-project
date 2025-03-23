@@ -44,9 +44,11 @@
 @if (artist && isShowModal()) {
   <app-dialog-with-canvas
     [artist]="artist"
+    [polygons]="polygonsBySelectedArtist()"
     (isCloseEmit)="closeDialog($event)"
-    (savePolygonsEmit)="onSavePolygons($event, artist.id)"
-  ></app-dialog-with-canvas>
+    (savePolygonsEmit)="
+      onSavePolygons($event, artist.id)
+    "></app-dialog-with-canvas>
 }
 
 <ng-template #emptyList>

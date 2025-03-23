@@ -56,13 +56,13 @@ export default class ArtistListComponent implements OnInit {
   protected readonly artistsWithPolygonsIndicator = toSignal(
     combineLatest([
       this.artistsStore.select(ArtistsSelectors.selectAllArtists),
-      this.artistsStore.select(ArtistsSelectors.selectPolygons),
+      this.artistsStore.select(ArtistsSelectors.selectAllPolygons),
       this.recheckArtistsTrigger.pipe(startWith(1)),
     ]).pipe(
       map(([artists, polygons]) => {
         if (polygons?.length) {
           const artistsWithPolygons = new Set(
-            polygons.map((sp) => sp.artistId),
+            polygons.map((sp) => sp.polygons.length && sp.artistId),
           );
 
           return (
@@ -77,10 +77,6 @@ export default class ArtistListComponent implements OnInit {
     ),
   );
 
-  // private readonly artists = toSignal(
-  //   this.artistsStore.select(ArtistsSelectors.selectAllArtists),
-  // );
-
   protected readonly loading = toSignal(
     this.loadingStore.select(
       LoadingSelectors.selectLoadingByType(LoadingType.ARTISTS_LIST),
@@ -92,9 +88,11 @@ export default class ArtistListComponent implements OnInit {
   );
 
   protected readonly searchControl = new FormControl<string | null>(null);
-  protected readonly artistsMatrix = signal<ArtistModel[][]>([]);
-  protected readonly isShowModal = signal<boolean>(false);
   protected readonly Array = Array;
+
+  protected readonly artistsMatrix = signal<ArtistModel[][]>([]);
+  protected readonly polygonsBySelectedArtist = signal<Polygon[]>([]);
+  protected readonly isShowModal = signal<boolean>(false);
 
   private scrollSubject = new Subject<number>();
 
@@ -114,6 +112,20 @@ export default class ArtistListComponent implements OnInit {
       const viewport = this.virtualScrollViewport();
       if (viewport) {
         this.initializeObserver(viewport);
+      }
+    });
+
+    effect(() => {
+      const artist = this.selectedArtist();
+      if (artist) {
+        untracked(() => {
+          this.artistsStore
+            .select(ArtistsSelectors.selectPolygonsBySelectedArtist(artist.id))
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((polygons) => {
+              this.polygonsBySelectedArtist.set(polygons);
+            });
+        });
       }
     });
   }

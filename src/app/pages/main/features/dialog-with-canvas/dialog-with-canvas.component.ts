@@ -9,7 +9,6 @@ import {
   inject,
   input,
   output,
-  signal,
   untracked,
   viewChild,
 } from '@angular/core';
@@ -53,8 +52,6 @@ export class DialogWithCanvasComponent {
   readonly isCloseEmit = output<boolean>();
   readonly savePolygonsEmit = output<Polygon[]>();
 
-  protected scaleValue = signal<number>(1);
-
   private readonly canvasNativeElement = computed(
     () => this.canvas()?.nativeElement,
   );
@@ -65,7 +62,7 @@ export class DialogWithCanvasComponent {
 
   private state = CanvasState.idle;
   private color = POLYGONS_COLORS.red;
-  private objectCollection: Polygon[] = [];
+  private polygonsCollection: Polygon[] = [];
   private canvasHelper!: CanvasHelper;
 
   private mouseDown$: Observable<MouseEvent> = EMPTY;
@@ -89,6 +86,8 @@ export class DialogWithCanvasComponent {
       const canvas = this.canvasNativeElement();
       const artist = this.artist();
       const context = this.context();
+      const polygons = this.polygons();
+
       if (modal && canvas && artist && context) {
         untracked(() => {
           this.canvasHelper = new CanvasHelper(
@@ -97,6 +96,12 @@ export class DialogWithCanvasComponent {
             this.color,
           );
           this.canvasHelper.init();
+
+          if (polygons) {
+            this.addPolygons(polygons);
+
+            this.canvasHelper.drawPolygonsCollection(this.polygonsCollection);
+          }
 
           this.drawingSubscription();
           this.movingSubscription();
@@ -107,8 +112,25 @@ export class DialogWithCanvasComponent {
     });
   }
 
+  private addPolygons(polygons: Polygon[]) {
+    const newPolygons = polygons.map((polygon) => {
+      const clonedPoints = polygon.points.map((point) => ({
+        x: point.x,
+        y: point.y,
+      }));
+      return new Polygon(clonedPoints, polygon.angle, polygon.color);
+    });
+
+    this.polygonsCollection = [...newPolygons];
+  }
+
   protected onSave(): void {
-    this.savePolygonsEmit.emit(this.objectCollection);
+    this.savePolygonsEmit.emit(this.polygonsCollection);
+  }
+
+  protected clearPolygons(): void {
+    this.polygonsCollection = [];
+    this.canvasHelper.clearCanvas();
   }
 
   private drawingSubscription(): void {
@@ -123,7 +145,7 @@ export class DialogWithCanvasComponent {
         drawingPolygons.length = 0;
         this.canvasHelper.clearCanvas();
         this.changeState(CanvasState.idle);
-        this.canvasHelper.drawPolygonsCollection(this.objectCollection);
+        this.canvasHelper.drawPolygonsCollection(this.polygonsCollection);
       }
     });
 
@@ -148,10 +170,10 @@ export class DialogWithCanvasComponent {
             if (this.canvasHelper.isNearStartPoint(drawingPolygons, x, y)) {
               this.canvasHelper.closePolygon();
               const newPolygon = new Polygon(drawingPolygons, 0, this.color);
-              this.objectCollection.push(newPolygon);
+              this.polygonsCollection.push(newPolygon);
               this.changeState(CanvasState.idle);
               drawingPolygons = [];
-              this.canvasHelper.drawPolygonsCollection(this.objectCollection);
+              this.canvasHelper.drawPolygonsCollection(this.polygonsCollection);
             } else {
               drawingPolygons.push({ x, y });
               this.canvasHelper.drawActivePolygon(
@@ -172,7 +194,7 @@ export class DialogWithCanvasComponent {
               yCurrent: event.offsetY,
             })),
             tap(({ xCurrent, yCurrent }) => {
-              this.canvasHelper.drawPolygonsCollection(this.objectCollection);
+              this.canvasHelper.drawPolygonsCollection(this.polygonsCollection);
               this.canvasHelper.drawCurrentPolygon(
                 this.context(),
                 drawingPolygons,
@@ -193,11 +215,11 @@ export class DialogWithCanvasComponent {
         filter(() => this.state === CanvasState.moving),
         switchMap((downEvent) => {
           this.changeState(CanvasState.drag);
-          const currentItem = this.objectCollection.find((item) =>
+          const currentItem = this.polygonsCollection.find((item) =>
             item.containsCursor(downEvent.offsetX, downEvent.offsetY),
           );
           if (currentItem) {
-            this.canvasHelper.drawPolygonsCollection(this.objectCollection);
+            this.canvasHelper.drawPolygonsCollection(this.polygonsCollection);
             currentItem.drawBoundingBox(this.context());
           } else {
             return EMPTY;
@@ -214,7 +236,7 @@ export class DialogWithCanvasComponent {
               previousOffsetY = moveEvent.offsetY;
               currentItem.translate(dx, dy);
 
-              this.canvasHelper.drawPolygonsCollection(this.objectCollection);
+              this.canvasHelper.drawPolygonsCollection(this.polygonsCollection);
               currentItem.drawBoundingBox(this.context());
             }),
             takeUntil(
@@ -248,7 +270,7 @@ export class DialogWithCanvasComponent {
         switchMap((downEvent) => {
           this.changeState(CanvasState.drag);
 
-          const currentItem = this.objectCollection.find((item) =>
+          const currentItem = this.polygonsCollection.find((item) =>
             item.isCursorNearRotationHandle(
               this.context(),
               downEvent.offsetX,
@@ -265,7 +287,7 @@ export class DialogWithCanvasComponent {
               this.canvasHelper.handleRotation(
                 currentItem,
                 moveEvent,
-                this.objectCollection,
+                this.polygonsCollection,
               ),
             ),
             takeUntil(
@@ -283,10 +305,10 @@ export class DialogWithCanvasComponent {
   }
 
   private getCursorState(event: MouseEvent): CursorState {
-    const moveItem = this.objectCollection.find((item) =>
+    const moveItem = this.polygonsCollection.find((item) =>
       item.containsCursor(event.offsetX, event.offsetY),
     );
-    const rotateItem = this.objectCollection.find((item) =>
+    const rotateItem = this.polygonsCollection.find((item) =>
       item.isCursorNearRotationHandle(
         this.context(),
         event.offsetX,
