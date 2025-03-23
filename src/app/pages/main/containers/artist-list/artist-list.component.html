@@ -18,7 +18,8 @@
         @for (artist of row; track $index) {
           <app-artist-card
             [artist]="artist"
-            [loading]="loadingState"></app-artist-card>
+            [loading]="loadingState"
+            (click)="selectArtist(artist.id)"></app-artist-card>
         }
       </div>
     </cdk-virtual-scroll-viewport>
@@ -36,6 +37,14 @@
     <div *ngTemplateOutlet="emptyList"></div>
   }
 </div>
+
+@let artist = selectedArtist();
+
+@if (artist) {
+  <app-dialog-with-canvas
+    [artist]="artist"
+    (isCloseEmit)="closeDialog($event)"></app-dialog-with-canvas>
+}
 
 <ng-template #emptyList>
   <div class="flex items-center justify-center h-full p-4">

@@ -12,5 +12,5 @@ export type AppState = {
 
 export const appReducers: ActionReducerMap<AppState> = {
   loading: loadingReducer,
-  artists: artistsReducer,
+  artists: artistsReducer.reducer,
 };

@@ -1,10 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  ArtistModel,
-  FilterOptionsModel,
-  LoadOptionsModel,
-  PaginationResult,
-} from '@models';
+import { ArtistModel, FilterOptionsModel, PaginationResult } from '@models';
 import { createActionGroup, emptyProps } from '@ngrx/store';
 
 export const ArtistsActions = createActionGroup({
@@ -25,6 +20,6 @@ export const ArtistsActions = createActionGroup({
 export const ArtistActions = createActionGroup({
   source: 'Artist Page',
   events: {
-    getArtist: (id: string) => ({ id }),
+    setSelectedArtistId: (id: string | null) => ({ id }),
   },
 });

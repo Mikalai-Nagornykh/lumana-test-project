@@ -22,7 +22,8 @@ import { Store } from '@ngrx/store';
 import { LoadingSelectors, LoadingState } from '@store';
 import { debounceTime, startWith, Subject } from 'rxjs';
 import { MATRIX_BREAKPOINTS } from '../../constants/virtuall-scroll-matrix-breakpoints.const';
-import { ArtistsActions } from '../../store/artists.actions';
+import { DialogWithCanvasComponent } from '../../features/dialog-with-canvas/dialog-with-canvas.component';
+import { ArtistActions, ArtistsActions } from '../../store/artists.actions';
 import { ArtistsState } from '../../store/artists.reducers';
 import { ArtistsSelectors } from '../../store/artists.selectors';
 import { ArtistCardComponent } from '../../ui/artist-card/artist-card.component';
@@ -36,6 +37,7 @@ import { AutocompleteSearchComponent } from '../../ui/autocomplete-search/autoco
     ArtistCardComponent,
     NgTemplateOutlet,
     AutocompleteSearchComponent,
+    DialogWithCanvasComponent,
   ],
   templateUrl: './artist-list.component.html',
   styleUrl: './artist-list.component.scss',
@@ -55,6 +57,10 @@ export default class ArtistListComponent implements OnInit {
     this.loadingStore.select(
       LoadingSelectors.selectLoadingByType(LoadingType.ARTISTS_LIST),
     ),
+  );
+
+  protected readonly selectedArtist = toSignal(
+    this.artistsStore.select(ArtistsSelectors.selectSelectedArtist),
   );
 
   protected readonly searchControl = new FormControl<string | null>(null);
@@ -110,6 +116,14 @@ export default class ArtistListComponent implements OnInit {
 
   protected onScroll(index: number): void {
     this.scrollSubject.next(index);
+  }
+
+  protected selectArtist(artistId: string): void {
+    this.artistsStore.dispatch(ArtistActions.setSelectedArtistId(artistId));
+  }
+
+  protected closeDialog(isClose: boolean): void {
+    this.artistsStore.dispatch(ArtistActions.setSelectedArtistId(null));
   }
 
   private nextBatch(index: number): void {

@@ -5,13 +5,16 @@ import {
   Meta,
 } from '@models';
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { createReducer, on } from '@ngrx/store';
-import { ArtistsActions } from './artists.actions';
+import { createFeature, createReducer, on } from '@ngrx/store';
+import { SelectedPolygonsModel } from '../models/selected-polygons.model';
+import { ArtistActions, ArtistsActions } from './artists.actions';
 
 export interface ArtistsState extends EntityState<ArtistModel> {
   meta: Meta | null;
   loadOptions: LoadOptionsModel;
   filterOptions: FilterOptionsModel | null;
+  selectedArtistId: string | null;
+  selectedPolygons: SelectedPolygonsModel[];
 }
 
 export const artistsEntityAdapter: EntityAdapter<ArtistModel> =
@@ -36,27 +39,38 @@ const initialState: ArtistsState = artistsEntityAdapter.getInitialState({
   loadOptions: initialLoadOptions,
   filterOptions: null,
   entities: [],
+  selectedArtistId: '',
+  selectedPolygons: [],
 });
 
-export const artistsReducer = createReducer(
-  initialState,
-  on(ArtistsActions.getArtistsSuccess, (state, { paginationResult }) =>
-    artistsEntityAdapter.addMany(paginationResult.items, {
+export const artistsFeatureKey = 'artists';
+
+export const artistsReducer = createFeature({
+  name: artistsFeatureKey,
+  reducer: createReducer(
+    initialState,
+    on(ArtistsActions.getArtistsSuccess, (state, { paginationResult }) =>
+      artistsEntityAdapter.addMany(paginationResult.items, {
+        ...state,
+        meta: {
+          limit: paginationResult.limit,
+          offset: paginationResult.offset,
+          total: paginationResult.total,
+          href: paginationResult.href,
+          next: paginationResult.next,
+          previous: paginationResult.previous,
+        },
+      }),
+    ),
+    on(ArtistsActions.setFilterOptions, (state, { filterOptions }) =>
+      artistsEntityAdapter.removeAll({
+        ...state,
+        filterOptions,
+      }),
+    ),
+    on(ArtistActions.setSelectedArtistId, (state, { id }) => ({
       ...state,
-      meta: {
-        limit: paginationResult.limit,
-        offset: paginationResult.offset,
-        total: paginationResult.total,
-        href: paginationResult.href,
-        next: paginationResult.next,
-        previous: paginationResult.previous,
-      },
-    }),
+      selectedArtistId: id,
+    })),
   ),
-  on(ArtistsActions.setFilterOptions, (state, { filterOptions }) =>
-    artistsEntityAdapter.removeAll({
-      ...state,
-      filterOptions,
-    }),
-  ),
-);
+});

@@ -1,11 +1,22 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { artistsEntityAdapter, ArtistsState } from './artists.reducers';
+import {
+  artistsEntityAdapter,
+  artistsFeatureKey,
+  ArtistsState,
+} from './artists.reducers';
 
-const selectArtistsFeature = createFeatureSelector<ArtistsState>('artists');
+const selectArtistsFeature =
+  createFeatureSelector<ArtistsState>(artistsFeatureKey);
 
 export const selectAllArtists = createSelector(
   selectArtistsFeature,
   artistsEntityAdapter.getSelectors().selectAll,
+);
+
+export const selectSelectedArtist = createSelector(
+  selectArtistsFeature,
+  (state) =>
+    state.selectedArtistId ? state.entities[state.selectedArtistId] : null,
 );
 
 export const selectLoadOptions = createSelector(
@@ -28,4 +39,5 @@ export const ArtistsSelectors = {
   selectLoadOptions,
   selectFilterOptions,
   selectMeta,
+  selectSelectedArtist,
 };
