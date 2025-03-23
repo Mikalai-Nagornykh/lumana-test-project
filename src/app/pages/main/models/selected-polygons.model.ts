@@ -1,4 +1,6 @@
+import { Polygon } from '../utils/classes/canvas-polygon.class';
+
 export type SelectedPolygonsModel = {
   artistId: string;
-  canvasPolygons: number[][];
+  polygons: Polygon[];
 };

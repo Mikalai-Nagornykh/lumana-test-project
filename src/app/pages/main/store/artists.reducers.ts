@@ -72,5 +72,9 @@ export const artistsReducer = createFeature({
       ...state,
       selectedArtistId: id,
     })),
+    on(ArtistActions.setPolygons, (state, { polygons }) => ({
+      ...state,
+      selectedPolygons: [...state.selectedPolygons, polygons],
+    })),
   ),
 });

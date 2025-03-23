@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ArtistModel, FilterOptionsModel, PaginationResult } from '@models';
 import { createActionGroup, emptyProps } from '@ngrx/store';
+import { SelectedPolygonsModel } from '../models/selected-polygons.model';
 
 export const ArtistsActions = createActionGroup({
   source: 'Artists Page',
@@ -21,5 +22,6 @@ export const ArtistActions = createActionGroup({
   source: 'Artist Page',
   events: {
     setSelectedArtistId: (id: string | null) => ({ id }),
+    setPolygons: (polygons: SelectedPolygonsModel) => ({ polygons }),
   },
 });

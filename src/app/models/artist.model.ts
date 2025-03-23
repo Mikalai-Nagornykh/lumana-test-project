@@ -11,6 +11,7 @@ export type ArtistModel = {
   };
   images: ArtistImage[];
   type: string;
+  hasPolygons?: boolean;
 };
 
 type ArtistImage = {

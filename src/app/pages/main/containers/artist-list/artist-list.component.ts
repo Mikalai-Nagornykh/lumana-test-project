@@ -20,14 +20,16 @@ import { LoadingType } from '@constants';
 import { ArtistModel } from '@models';
 import { Store } from '@ngrx/store';
 import { LoadingSelectors, LoadingState } from '@store';
-import { debounceTime, startWith, Subject } from 'rxjs';
+import { combineLatest, debounceTime, map, startWith, Subject } from 'rxjs';
 import { MATRIX_BREAKPOINTS } from '../../constants/virtuall-scroll-matrix-breakpoints.const';
 import { DialogWithCanvasComponent } from '../../features/dialog-with-canvas/dialog-with-canvas.component';
+import { SelectedPolygonsModel } from '../../models/selected-polygons.model';
 import { ArtistActions, ArtistsActions } from '../../store/artists.actions';
 import { ArtistsState } from '../../store/artists.reducers';
 import { ArtistsSelectors } from '../../store/artists.selectors';
 import { ArtistCardComponent } from '../../ui/artist-card/artist-card.component';
 import { AutocompleteSearchComponent } from '../../ui/autocomplete-search/autocomplete-search.component';
+import { Polygon } from '../../utils/classes/canvas-polygon.class';
 
 @Component({
   selector: 'app-artist-list',
@@ -49,9 +51,35 @@ export default class ArtistListComponent implements OnInit {
   private artistsStore = inject<Store<ArtistsState>>(Store<ArtistsState>);
   private loadingStore = inject<Store<LoadingState>>(Store<LoadingState>);
 
-  protected readonly artists = toSignal(
-    this.artistsStore.select(ArtistsSelectors.selectAllArtists),
+  private recheckArtistsTrigger = new Subject<number>();
+
+  protected readonly artistsWithPolygonsIndicator = toSignal(
+    combineLatest([
+      this.artistsStore.select(ArtistsSelectors.selectAllArtists),
+      this.artistsStore.select(ArtistsSelectors.selectPolygons),
+      this.recheckArtistsTrigger.pipe(startWith(1)),
+    ]).pipe(
+      map(([artists, polygons]) => {
+        if (polygons?.length) {
+          const artistsWithPolygons = new Set(
+            polygons.map((sp) => sp.artistId),
+          );
+
+          return (
+            artists?.map((artist) => ({
+              ...artist,
+              hasPolygons: artistsWithPolygons.has(artist.id),
+            })) ?? []
+          );
+        }
+        return artists;
+      }),
+    ),
   );
+
+  // private readonly artists = toSignal(
+  //   this.artistsStore.select(ArtistsSelectors.selectAllArtists),
+  // );
 
   protected readonly loading = toSignal(
     this.loadingStore.select(
@@ -65,7 +93,7 @@ export default class ArtistListComponent implements OnInit {
 
   protected readonly searchControl = new FormControl<string | null>(null);
   protected readonly artistsMatrix = signal<ArtistModel[][]>([]);
-
+  protected readonly isShowModal = signal<boolean>(false);
   protected readonly Array = Array;
 
   private scrollSubject = new Subject<number>();
@@ -74,7 +102,7 @@ export default class ArtistListComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      const artists = this.artists();
+      const artists = this.artistsWithPolygonsIndicator();
       if (artists) {
         untracked(() => {
           this.artistsMatrix.set(this.changeMatrixSizes(artists, 5));
@@ -119,11 +147,22 @@ export default class ArtistListComponent implements OnInit {
   }
 
   protected selectArtist(artistId: string): void {
+    this.isShowModal.set(true);
     this.artistsStore.dispatch(ArtistActions.setSelectedArtistId(artistId));
   }
 
   protected closeDialog(isClose: boolean): void {
-    this.artistsStore.dispatch(ArtistActions.setSelectedArtistId(null));
+    this.isShowModal.set(!isClose);
+  }
+
+  protected onSavePolygons(polygons: Polygon[], artistId: string): void {
+    const selectedPolygons: SelectedPolygonsModel = {
+      artistId,
+      polygons: polygons,
+    };
+    this.artistsStore.dispatch(ArtistActions.setPolygons(selectedPolygons));
+    this.isShowModal.set(false);
+    this.recheckArtistsTrigger.next(1);
   }
 
   private nextBatch(index: number): void {
@@ -148,7 +187,10 @@ export default class ArtistListComponent implements OnInit {
 
         if (breakpoint) {
           this.artistsMatrix.set(
-            this.changeMatrixSizes(this.artists() ?? [], breakpoint.columns),
+            this.changeMatrixSizes(
+              this.artistsWithPolygonsIndicator() ?? [],
+              breakpoint.columns,
+            ),
           );
         }
       }

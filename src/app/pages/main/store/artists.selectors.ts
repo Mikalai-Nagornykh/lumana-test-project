@@ -1,4 +1,5 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { SelectedPolygonsModel } from '../models/selected-polygons.model';
 import {
   artistsEntityAdapter,
   artistsFeatureKey,
@@ -17,6 +18,11 @@ export const selectSelectedArtist = createSelector(
   selectArtistsFeature,
   (state) =>
     state.selectedArtistId ? state.entities[state.selectedArtistId] : null,
+);
+
+export const selectPolygons = createSelector(
+  selectArtistsFeature,
+  (state) => state.selectedPolygons,
 );
 
 export const selectLoadOptions = createSelector(
@@ -40,4 +46,5 @@ export const ArtistsSelectors = {
   selectFilterOptions,
   selectMeta,
   selectSelectedArtist,
+  selectPolygons,
 };

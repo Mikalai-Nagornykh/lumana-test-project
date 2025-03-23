@@ -49,7 +49,9 @@ export class DialogWithCanvasComponent {
   private destroyRef = inject(DestroyRef);
 
   readonly artist = input.required<ArtistModel>();
+  readonly polygons = input<Polygon[]>();
   readonly isCloseEmit = output<boolean>();
+  readonly savePolygonsEmit = output<Polygon[]>();
 
   protected scaleValue = signal<number>(1);
 
@@ -103,6 +105,10 @@ export class DialogWithCanvasComponent {
         });
       }
     });
+  }
+
+  protected onSave(): void {
+    this.savePolygonsEmit.emit(this.objectCollection);
   }
 
   private drawingSubscription(): void {

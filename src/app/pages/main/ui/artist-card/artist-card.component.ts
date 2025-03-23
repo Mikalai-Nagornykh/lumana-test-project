@@ -11,4 +11,5 @@ import { ArtistModel } from '@models';
 export class ArtistCardComponent {
   readonly artist = input.required<ArtistModel | null>();
   readonly loading = input<boolean>(false);
+  readonly hasPolygons = input<boolean>(false);
 }
