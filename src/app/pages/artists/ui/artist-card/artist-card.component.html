@@ -23,7 +23,7 @@
   @let artistModel = artist();
   @if (artistModel) {
     <img
-      [src]="artistModel.images[0]?.url || 'favicon.ico'"
+      [src]="artistModel.images[0]?.url || 'empty-artist-image.jpg'"
       [alt]="artistModel.name"
       class="w-full h-48 object-cover rounded-lg" />
     <div class="mt-3">

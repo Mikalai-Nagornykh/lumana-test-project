@@ -92,7 +92,7 @@ export class DialogWithCanvasComponent {
         untracked(() => {
           this.canvasHelper = new CanvasHelper(
             canvas,
-            artist.images[0]?.url || 'favicon.ico',
+            artist.images[0]?.url || 'empty-artist-image.jpg',
           );
           this.canvasHelper.init();
 
