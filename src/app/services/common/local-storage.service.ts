@@ -23,7 +23,6 @@ export class LocalStorageService {
   private getOrCreateSignal<T>(key: string): WritableSignal<T | null> {
     if (!this.storageSignals.has(key)) {
       const storedValue = this.loadFromLocalStorage<T>(key);
-      // Create a new signal with the current localStorage value
       const signalValue = signal<T | null>(storedValue);
       this.storageSignals.set(key, signalValue);
     }
