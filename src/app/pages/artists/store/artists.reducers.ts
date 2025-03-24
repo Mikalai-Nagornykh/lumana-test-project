@@ -74,10 +74,31 @@ export const artistsReducer = createFeature({
       ...state,
       selectedArtistId: id,
     })),
-    on(ArtistActions.setPolygons, (state, { polygons }) => ({
-      ...state,
-      selectedPolygons: [polygons],
-    })),
+    on(ArtistActions.setPolygons, (state, { polygons }) => {
+      const artistId = polygons.artistId;
+      const existingIndex = state.selectedPolygons.findIndex(
+        (sp) => sp.artistId === artistId,
+      );
+
+      if (existingIndex !== -1) {
+        const updatedPolygons = state.selectedPolygons.map((sp, index) => {
+          if (index === existingIndex) {
+            return { artistId, polygons: polygons.polygons };
+          }
+          return sp;
+        });
+
+        return {
+          ...state,
+          selectedPolygons: updatedPolygons,
+        };
+      } else {
+        return {
+          ...state,
+          selectedPolygons: [...state.selectedPolygons, polygons],
+        };
+      }
+    }),
     on(ArtistsActions.addSearchTokens, (state, { tokens }) => ({
       ...state,
       searchTokens: Array.from(new Set([...state.searchTokens, ...tokens])),
