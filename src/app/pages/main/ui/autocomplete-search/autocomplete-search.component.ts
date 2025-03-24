@@ -15,6 +15,7 @@ import {
   selector: 'app-autocomplete-search',
   imports: [FormsModule],
   templateUrl: './autocomplete-search.component.html',
+  styleUrl: 'autocomplete-search.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
@@ -23,12 +24,9 @@ import {
       multi: true,
     },
   ],
-  host: {
-    class: 'w-2',
-  },
 })
 export class AutocompleteSearchComponent implements ControlValueAccessor {
-  readonly options = input.required<any[]>();
+  readonly options = input.required<string[]>();
 
   protected readonly = signal<boolean>(false);
   protected value = signal<string | null>(null);
@@ -38,6 +36,7 @@ export class AutocompleteSearchComponent implements ControlValueAccessor {
 
   onChange(value: Parameters<typeof this.writeValue>[0]): void {
     if (this.onChangeFunction) {
+      this.value.set(value);
       this.onChangeFunction(value);
     }
   }

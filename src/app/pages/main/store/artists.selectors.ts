@@ -52,6 +52,11 @@ export const selectMeta = createSelector(
   (state) => state.meta,
 );
 
+export const selectSearchTokens = createSelector(
+  selectArtistsFeature,
+  (state) => state.searchTokens,
+);
+
 export const ArtistsSelectors = {
   selectAllArtists,
   selectLoadOptions,
@@ -60,4 +65,5 @@ export const ArtistsSelectors = {
   selectSelectedArtist,
   selectAllPolygons,
   selectPolygonsBySelectedArtist,
+  selectSearchTokens,
 };

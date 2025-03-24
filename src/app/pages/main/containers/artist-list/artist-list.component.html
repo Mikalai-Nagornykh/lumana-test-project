@@ -2,7 +2,7 @@
   <div class="relative w-98">
     <app-autocomplete-search
       [formControl]="searchControl"
-      [options]="[]"></app-autocomplete-search>
+      [options]="searchTokens() ?? []"></app-autocomplete-search>
   </div>
 
   @let artistsLength = artistsWithPolygonsIndicator()?.length ?? 0;

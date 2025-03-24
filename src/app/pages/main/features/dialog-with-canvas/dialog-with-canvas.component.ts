@@ -93,7 +93,6 @@ export class DialogWithCanvasComponent {
           this.canvasHelper = new CanvasHelper(
             canvas,
             artist.images[0]?.url || 'favicon.ico',
-            this.color,
           );
           this.canvasHelper.init();
 

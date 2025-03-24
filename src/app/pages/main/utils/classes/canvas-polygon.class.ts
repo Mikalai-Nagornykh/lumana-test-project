@@ -113,7 +113,7 @@ export class Polygon {
       centerY + (minX - centerX) * sinA + (minY - centerY) * cosA;
 
     const rotatePoint = new Path2D();
-    rotatePoint.arc(rotatedX * 0.8, rotatedY * 0.8, 8, 0, 2 * Math.PI);
+    rotatePoint.arc(rotatedX, rotatedY, 8, 0, 2 * Math.PI);
     return context.isPointInPath(rotatePoint, cursorX, cursorY);
   }
 }

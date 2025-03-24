@@ -15,6 +15,7 @@ export interface ArtistsState extends EntityState<ArtistModel> {
   filterOptions: FilterOptionsModel | null;
   selectedArtistId: string | null;
   selectedPolygons: SelectedPolygonsModel[];
+  searchTokens: string[];
 }
 
 export const artistsEntityAdapter: EntityAdapter<ArtistModel> =
@@ -41,6 +42,7 @@ const initialState: ArtistsState = artistsEntityAdapter.getInitialState({
   entities: [],
   selectedArtistId: '',
   selectedPolygons: [],
+  searchTokens: [],
 });
 
 export const artistsFeatureKey = 'artists';
@@ -75,6 +77,10 @@ export const artistsReducer = createFeature({
     on(ArtistActions.setPolygons, (state, { polygons }) => ({
       ...state,
       selectedPolygons: [polygons],
+    })),
+    on(ArtistsActions.addSearchTokens, (state, { tokens }) => ({
+      ...state,
+      searchTokens: Array.from(new Set([...state.searchTokens, ...tokens])),
     })),
   ),
 });

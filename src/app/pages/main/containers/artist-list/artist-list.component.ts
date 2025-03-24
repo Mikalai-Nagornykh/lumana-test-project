@@ -77,6 +77,10 @@ export default class ArtistListComponent implements OnInit {
     ),
   );
 
+  protected readonly searchTokens = toSignal(
+    this.artistsStore.select(ArtistsSelectors.selectSearchTokens),
+  );
+
   protected readonly loading = toSignal(
     this.loadingStore.select(
       LoadingSelectors.selectLoadingByType(LoadingType.ARTISTS_LIST),

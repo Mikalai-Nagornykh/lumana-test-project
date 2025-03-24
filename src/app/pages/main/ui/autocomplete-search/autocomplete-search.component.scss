@@ -1,0 +1,15 @@
+.search {
+  .dropdown-content {
+    position: relative;
+    display: none;
+  }
+
+  &:focus-within > .dropdown-content {
+    display: block;
+  }
+
+  &:focus-within > .dropdown {
+    display: block;
+  }
+}
+

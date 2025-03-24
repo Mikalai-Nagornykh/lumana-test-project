@@ -15,6 +15,7 @@ export const ArtistsActions = createActionGroup({
       filterOptions,
     }),
     loadMoreArtists: emptyProps(),
+    addSearchTokens: (tokens: string[]) => ({ tokens }),
   },
 });
 

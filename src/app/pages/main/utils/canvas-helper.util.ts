@@ -2,13 +2,11 @@ import { Point } from '../models/polygon.model';
 import { Polygon } from './classes/canvas-polygon.class';
 
 export class CanvasHelper {
-  private context: CanvasRenderingContext2D;
-  private scale = 1;
+  private readonly context: CanvasRenderingContext2D;
 
   constructor(
     public canvas: HTMLCanvasElement,
     public bgUrl: string,
-    public color: string,
   ) {
     this.context = canvas.getContext('2d')!;
   }
@@ -65,7 +63,7 @@ export class CanvasHelper {
     context.lineWidth = 1;
     context.strokeStyle = color;
     context.stroke(path);
-    context.setLineDash([]); // Reset dash style
+    context.setLineDash([]);
   }
 
   public init(): void {
@@ -187,7 +185,7 @@ export class CanvasHelper {
   }
 
   private setCanvasScale(): void {
-    const scale = window.devicePixelRatio || 1;
+    const scale = 1;
     this.canvas.width = this.canvas.clientWidth * scale;
     this.canvas.height = this.canvas.clientHeight * scale;
     this.context.scale(scale, scale);

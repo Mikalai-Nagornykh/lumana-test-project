@@ -3,10 +3,11 @@ import { LoadingType } from '@constants';
 import { LoadOptionsModel } from '@models';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { ArtistService } from '@services';
 import { LoadingActions } from '@store';
-import { filter, map, switchMap } from 'rxjs';
+import { filter, map, mergeMap, switchMap } from 'rxjs';
+import { extractSearchTokens } from '../utils/extract-search-tokens.util';
 
 import { ArtistsActions } from './artists.actions';
 import { ArtistsState } from './artists.reducers';
@@ -26,9 +27,20 @@ export class ArtistsEffect {
         this.artistsStore.select(ArtistsSelectors.selectFilterOptions),
       ]),
       switchMap(([, loadOptions, filterOptions]) =>
-        this.artistService
-          .getArtists(loadOptions, filterOptions)
-          .pipe(map((response) => ArtistsActions.getArtistsSuccess(response))),
+        this.artistService.getArtists(loadOptions, filterOptions).pipe(
+          mergeMap((response) => {
+            const actions: Action[] = [
+              ArtistsActions.getArtistsSuccess(response),
+            ];
+
+            if (filterOptions?.search && response.items.length > 0) {
+              const tokens = extractSearchTokens(filterOptions.search);
+              actions.push(ArtistsActions.addSearchTokens(tokens));
+            }
+
+            return actions;
+          }),
+        ),
       ),
     ),
   );
