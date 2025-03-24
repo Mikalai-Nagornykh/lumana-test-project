@@ -1,12 +1,5 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { AuthActions } from '@auth';
-import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-root',
@@ -14,10 +7,4 @@ import { Store } from '@ngrx/store';
   templateUrl: './app.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
-  private authStore = inject(Store);
-
-  ngOnInit() {
-    this.authStore.dispatch(AuthActions.getAccessToken());
-  }
-}
+export class AppComponent {}

@@ -20,7 +20,7 @@ import {
 
 import { routes } from './app.routes';
 import { appReducers } from './app.state';
-import { ArtistsEffect } from './pages/main/store/artists.effect';
+import { ArtistsEffect } from './pages/artists/store/artists.effect';
 
 export const appConfig: ApplicationConfig = {
   providers: [

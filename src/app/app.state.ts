@@ -1,9 +1,10 @@
 import { ActionReducerMap } from '@ngrx/store';
+
+import { loadingReducer, LoadingState } from '@store';
 import {
   artistsReducer,
   ArtistsState,
-} from './pages/main/store/artists.reducers';
-import { loadingReducer, LoadingState } from '@store';
+} from './pages/artists/store/artists.reducers';
 
 export type AppState = {
   loading: LoadingState;

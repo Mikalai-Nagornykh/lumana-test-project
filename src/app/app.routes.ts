@@ -1,14 +1,21 @@
 import { Routes } from '@angular/router';
-import mainRoutes from './pages/main/main.routes';
+import artistsRoutes from './pages/artists/artists.routes';
+import { LayoutComponent } from './pages/layout/layout.component';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'artists',
+    redirectTo: 'main',
     pathMatch: 'full',
   },
   {
-    path: 'artists',
-    loadChildren: () => mainRoutes,
+    path: 'main',
+    component: LayoutComponent,
+    children: [
+      {
+        path: '',
+        loadChildren: () => artistsRoutes,
+      },
+    ],
   },
 ];
