@@ -1,5 +1,9 @@
 # Spotify artists list
 
+# Preview
+
+https://github.com/user-attachments/assets/288f94f3-9ce7-415f-ba7f-75cef7482cc8
+
 ## Technologies
 
 This project is built using the following technologies:
