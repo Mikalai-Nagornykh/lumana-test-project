@@ -11,12 +11,14 @@
   @if (artistsLength) {
     <cdk-virtual-scroll-viewport
       itemSize="360"
-      (scrolledIndexChange)="onScroll($event)">
+      appScrollEnd
+      (scrollEnd)="scrollEnd()">
       <div
         *cdkVirtualFor="let row of artistsMatrix(); trackBy: trackByIndex"
-        class="flex gap-5 mt-5">
+        class="flex">
         @for (artist of row; track $index) {
           <app-artist-card
+            class="m-2"
             [artist]="artist"
             [loading]="loadingState"
             [hasPolygons]="artist?.hasPolygons ?? false"

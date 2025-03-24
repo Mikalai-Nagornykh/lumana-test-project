@@ -17,6 +17,7 @@ import {
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { LoadingType } from '@constants';
+import { ScrollEndDirective } from '@directives';
 import { ArtistModel } from '@models';
 import { Store } from '@ngrx/store';
 import { LoadingSelectors, LoadingState } from '@store';
@@ -40,6 +41,7 @@ import { Polygon } from '../../utils/classes/canvas-polygon.class';
     NgTemplateOutlet,
     AutocompleteSearchComponent,
     DialogWithCanvasComponent,
+    ScrollEndDirective,
   ],
   templateUrl: './artist-list.component.html',
   styleUrl: './artist-list.component.scss',
@@ -98,7 +100,7 @@ export default class ArtistListComponent implements OnInit {
   protected readonly polygonsBySelectedArtist = signal<Polygon[]>([]);
   protected readonly isShowModal = signal<boolean>(false);
 
-  private scrollSubject = new Subject<number>();
+  private scrollEndEmit = new Subject<void>();
 
   private destroyRef = inject(DestroyRef);
 
@@ -137,9 +139,11 @@ export default class ArtistListComponent implements OnInit {
   ngOnInit() {
     this.artistsStore.dispatch(ArtistsActions.getArtists());
 
-    this.scrollSubject.pipe(debounceTime(300)).subscribe((index) => {
-      this.nextBatch(index);
-    });
+    this.scrollEndEmit
+      .pipe(debounceTime(150), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.artistsStore.dispatch(ArtistsActions.loadMoreArtists());
+      });
 
     this.searchControl.valueChanges
       .pipe(
@@ -158,8 +162,8 @@ export default class ArtistListComponent implements OnInit {
     return index;
   }
 
-  protected onScroll(index: number): void {
-    this.scrollSubject.next(index);
+  protected scrollEnd(): void {
+    this.scrollEndEmit.next();
   }
 
   protected selectArtist(artistId: string): void {
@@ -179,15 +183,6 @@ export default class ArtistListComponent implements OnInit {
     this.artistsStore.dispatch(ArtistActions.setPolygons(selectedPolygons));
     this.isShowModal.set(false);
     this.recheckArtistsTrigger.next(1);
-  }
-
-  private nextBatch(index: number): void {
-    const total = this.virtualScrollViewport()?.getDataLength() ?? 0;
-    const threshold = total * 0.8;
-
-    if (index > threshold) {
-      this.artistsStore.dispatch(ArtistsActions.loadMoreArtists());
-    }
   }
 
   private initializeObserver(viewport: CdkVirtualScrollViewport): void {

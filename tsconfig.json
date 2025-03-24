@@ -24,7 +24,8 @@
       "@services": ["app/services/index"],
       "@constants": ["app/constants/index"],
       "@auth": ["app/core/auth/index"],
-      "@store": ["app/store/index"]
+      "@store": ["app/store/index"],
+      "@directives": ["app/directives/index"]
     }
   },
   "angularCompilerOptions": {
