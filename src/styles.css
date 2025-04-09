@@ -4,22 +4,21 @@ body {
   height: 100vh;
 }
 
-/* Тёмный, тонкий скролл */
 ::-webkit-scrollbar {
-  width: 6px; /* Толщина */
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #2e3338; /* Цвет фона скроллбара */
+  background: #2e3338;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #444a50; /* Цвет ползунка */
+  background: #444a50;
   border-radius: 10px;
   transition: background 0.3s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #58a6ff; /* Яркое выделение при наведении */
+  background: #58a6ff;
 }
