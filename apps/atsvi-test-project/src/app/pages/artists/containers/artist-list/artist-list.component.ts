@@ -140,7 +140,7 @@ export default class ArtistListComponent implements OnInit {
     this.artistsStore.dispatch(ArtistsActions.getArtists());
 
     this.scrollEndEmit
-      .pipe(debounceTime(150), takeUntilDestroyed(this.destroyRef))
+      .pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.artistsStore.dispatch(ArtistsActions.loadMoreArtists());
       });

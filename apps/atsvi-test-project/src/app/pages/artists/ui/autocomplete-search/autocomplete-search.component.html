@@ -28,16 +28,18 @@
       required />
   </div>
 
+  @if (options().length) {
   <div class="dropdown-content">
     <ul
       class="absolute left-0 top-full w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
       @for (option of options(); track $index) {
-        <li
-          class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-          (click)="onChange(option)">
-          {{ option }}
-        </li>
+      <li
+        class="px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+        (click)="onChange(option)">
+        {{ option }}
+      </li>
       }
     </ul>
   </div>
+  }
 </div>

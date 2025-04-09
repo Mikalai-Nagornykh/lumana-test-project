@@ -4,10 +4,7 @@ import { Polygon } from './classes/canvas-polygon.class';
 export class CanvasHelper {
   private readonly context: CanvasRenderingContext2D;
 
-  constructor(
-    public canvas: HTMLCanvasElement,
-    public bgUrl: string,
-  ) {
+  constructor(public canvas: HTMLCanvasElement, public bgUrl: string) {
     this.context = canvas.getContext('2d')!;
   }
 

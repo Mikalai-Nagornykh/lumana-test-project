@@ -1,0 +1,87 @@
+{
+  "name": "atsvi-test-project",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "generators": {},
+  "sourceRoot": "apps/atsvi-test-project/src",
+  "prefix": "app",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "options": {
+        "outputPath": "dist/apps/atsvi-test-project",
+        "index": "apps/atsvi-test-project/src/index.html",
+        "browser": "apps/atsvi-test-project/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/atsvi-test-project/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/atsvi-test-project/public"
+          }
+        ],
+        "styles": ["apps/atsvi-test-project/src/styles.css"],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kB",
+              "maximumError": "1MB"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kB",
+              "maximumError": "8kB"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/atsvi-test-project/src/environments/environment.ts",
+              "with": "apps/atsvi-test-project/src/environments/environment.development.ts"
+            }
+          ]
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "atsvi-test-project:build:production"
+        },
+        "development": {
+          "buildTarget": "atsvi-test-project:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n"
+    },
+    "test": {
+      "executor": "@angular-devkit/build-angular:karma",
+      "options": {
+        "polyfills": ["zone.js", "zone.js/testing"],
+        "tsConfig": "apps/atsvi-test-project/tsconfig.spec.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/atsvi-test-project/public"
+          }
+        ],
+        "styles": ["apps/atsvi-test-project/src/styles.css"],
+        "scripts": []
+      }
+    }
+  }
+}

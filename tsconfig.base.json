@@ -1,9 +1,7 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
@@ -19,19 +17,21 @@
     "target": "ES2022",
     "module": "ES2022",
     "paths": {
-      "@environments": ["environments/environment.development"],
-      "@models": ["app/models/index"],
-      "@services": ["app/services/index"],
-      "@constants": ["app/constants/index"],
-      "@auth": ["app/core/auth/index"],
-      "@store": ["app/store/index"],
-      "@directives": ["app/directives/index"]
-    }
+      "@auth": ["apps/atsvi-test-project/src/app/core/auth/index"],
+      "@constants": ["apps/atsvi-test-project/src/app/constants/index"],
+      "@directives": ["apps/atsvi-test-project/src/app/directives/index"],
+      "@environments": ["apps/atsvi-test-project/src/environments/environment.development"],
+      "@models": ["apps/atsvi-test-project/src/app/models/index"],
+      "@services": ["apps/atsvi-test-project/src/app/services/index"],
+      "@store": ["apps/atsvi-test-project/src/app/store/index"]
+    },
+    "rootDir": "."
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "exclude": ["node_modules", "tmp"]
 }
