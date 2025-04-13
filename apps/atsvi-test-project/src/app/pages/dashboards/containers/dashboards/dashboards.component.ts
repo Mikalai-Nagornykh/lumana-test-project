@@ -5,56 +5,157 @@ import {
   inject,
   OnDestroy,
   OnInit,
+  signal,
+  viewChild,
 } from '@angular/core';
+import { WebSocketService } from '@services';
 import { initExampleRust, moving_average } from '@wasm-moving-average';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { WebSocketService } from '@services';
-import { RustWasmService } from '../../services/rust-wasm.service';
+import { format } from 'date-fns';
+
+type FilterType = 'MA' | 'MF' | 'EMA';
+
+interface FilterOption {
+  type: FilterType;
+  label: string;
+}
+
+const filterOptions: FilterOption[] = [
+  { type: 'MA', label: 'Moving Average' },
+  { type: 'MF', label: 'Median Filter' },
+  { type: 'EMA', label: 'Exponential Moving Average' },
+];
 
 @Component({
   selector: 'app-dashboards',
   imports: [CommonModule, BaseChartDirective],
-  providers: [RustWasmService],
   templateUrl: './dashboards.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardsComponent implements OnInit, OnDestroy {
+  private chart = viewChild(BaseChartDirective);
+
   private webSocketService = inject(WebSocketService);
 
   public lineChartData: ChartConfiguration<'line'>['data'] = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels: [],
     datasets: [
       {
-        data: [65, 59, 80, 81, 56, 55, 40],
-        label: 'Series A',
-        fill: true,
-        tension: 0.5,
-        borderColor: 'black',
-        backgroundColor: 'rgba(255,0,0,0.3)',
+        label: 'Raw Data',
+        data: [],
+        fill: false,
+        borderColor: 'rgba(255, 99, 132, 1)',
+        tension: 0.4,
+      },
+      {
+        label: 'Smoothed',
+        data: [],
+        fill: false,
+        borderColor: 'rgba(54, 162, 235, 1)',
+        tension: 0.4,
       },
     ],
   };
-
-  public lineChartOptions: ChartOptions<'line'> = {
+  protected lineChartOptions: ChartOptions<'line'> = {
     responsive: false,
+    animation: {
+      duration: 1000,
+      easing: 'linear',
+    },
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          color: '#f1f1f1',
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          autoSkip: true,
+          maxTicksLimit: 10,
+          color: '#9ca3af',
+          font: {
+            size: 12,
+          },
+        },
+        title: {
+          display: true,
+          text: 'Time',
+          color: '#d1d5db',
+          font: {
+            size: 14,
+            weight: 'bold',
+          },
+        },
+        grid: {
+          color: 'rgba(255, 255, 255, 0.1)',
+        },
+      },
+      y: {
+        ticks: {
+          color: '#ccc',
+        },
+        grid: {
+          color: 'rgba(255,255,255,0.1)',
+        },
+      },
+    },
   };
 
-  public lineChartLegend = true;
+  protected readonly filterOptions = filterOptions;
+  protected readonly lineChartLegend = true;
 
-  private rawData: number[] = [];
+  protected selectedType = filterOptions[0];
+  protected freezeMode = signal<boolean>(false);
 
-  data = [1, 2, 3, 4, 5, 6];
-  windowSize = 3;
+  private rawData: { time: Date; value: number }[] = [];
+  private maxPoints = 50;
+  private windowSize = 5;
+  private initialized = false;
 
   constructor() {
     this.webSocketService.connect('ws://localhost:8080');
   }
 
   async ngOnInit() {
-    this.webSocketService.messages$.subscribe(console.log);
     await initExampleRust();
-    // console.log(moving_average(this.data, this.windowSize));
+    this.initialized = true;
+
+    this.webSocketService.messages$.subscribe((msg) => {
+      const value = Number(msg);
+      if (isNaN(value)) return;
+
+      this.handleIncomingValue(value);
+    });
+  }
+
+  private handleIncomingValue(value: number) {
+    if (!this.initialized) return;
+
+    const now = new Date();
+
+    this.rawData.push({ time: now, value });
+
+    if (this.rawData.length > this.maxPoints) {
+      this.rawData.shift();
+    }
+
+    if (!this.freezeMode()) {
+      const times = this.rawData.map((d) => format(d.time, 'HH:mm:ss'));
+      const values = this.rawData.map((d) => d.value);
+
+      // @ts-ignore
+      const smoothed = moving_average(values, this.windowSize);
+
+      this.lineChartData.labels = [...times];
+      this.lineChartData.datasets[0].data = [...values];
+      this.lineChartData.datasets[1].data = [...smoothed];
+
+      this.chart()?.update();
+    }
   }
 
   ngOnDestroy() {

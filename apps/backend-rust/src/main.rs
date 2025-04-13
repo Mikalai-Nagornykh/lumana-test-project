@@ -17,7 +17,7 @@ async fn handle_connection(ws_stream: tokio_tungstenite::WebSocketStream<tokio::
             break;
         }
 
-        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+        tokio::time::sleep(std::time::Duration::from_millis(600)).await;
     }
 }
 

@@ -1,6 +1,28 @@
-<canvas baseChart width="400" height="400"
-        [type]="'line'"
-        [data]="lineChartData"
-        [options]="lineChartOptions"
-        [legend]="lineChartLegend">
-</canvas>
+<div class="w-full h-full">
+  <div class="flex flex-wrap gap-2 mb-4">
+    @for (option of filterOptions; track $index) {
+      <button
+        (click)="selectedType = option"
+        [ngClass]="{
+      'bg-blue-600 text-white': selectedType.type === option.type,
+      'bg-gray-700 text-gray-300 hover:bg-gray-600': selectedType.type !== option.type
+    }"
+        class="px-4 py-2 rounded-lg text-sm transition-colors duration-200 hover:cursor-pointer"
+      >
+        {{ option.label }}
+      </button>
+    }
+    <button
+      class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      (click)="freezeMode.set(!freezeMode())">
+      {{ freezeMode() ? 'Unlock' : 'Lock' }}
+    </button>
+  </div>
+
+  <canvas baseChart width="1024" height="600"
+          [type]="'line'"
+          [data]="lineChartData"
+          [options]="lineChartOptions"
+          [legend]="lineChartLegend">
+  </canvas>
+</div>
