@@ -20,10 +20,13 @@
       "@auth": ["apps/atsvi-test-project/src/app/core/auth/index"],
       "@constants": ["apps/atsvi-test-project/src/app/constants/index"],
       "@directives": ["apps/atsvi-test-project/src/app/directives/index"],
-      "@environments": ["apps/atsvi-test-project/src/environments/environment.development"],
+      "@environments": [
+        "apps/atsvi-test-project/src/environments/environment.development"
+      ],
       "@models": ["apps/atsvi-test-project/src/app/models/index"],
       "@services": ["apps/atsvi-test-project/src/app/services/index"],
-      "@store": ["apps/atsvi-test-project/src/app/store/index"]
+      "@store": ["apps/atsvi-test-project/src/app/store/index"],
+      "@wasm-moving-average": ["libs/rust-moving-average/src/public-api.ts"],
     },
     "rootDir": "."
   },

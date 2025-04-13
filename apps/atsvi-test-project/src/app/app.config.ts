@@ -10,6 +10,7 @@ import { environment } from '@environments';
 import { provideEffects } from '@ngrx/effects';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 import {
   ACCOUNT_API_URL_TOKEN,
@@ -27,6 +28,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([applyTokenInterceptor])),
+    provideCharts(withDefaultRegisterables()),
     provideStore(appReducers),
     provideEffects([AuthEffects, ArtistsEffect]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),

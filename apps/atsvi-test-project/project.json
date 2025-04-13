@@ -17,7 +17,7 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/atsvi-test-project/public"
+            "input": "libs/rust-moving-average/pkg"
           }
         ],
         "styles": ["apps/atsvi-test-project/src/styles.css"],

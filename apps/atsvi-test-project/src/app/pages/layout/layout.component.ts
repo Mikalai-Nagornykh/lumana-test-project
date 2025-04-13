@@ -7,10 +7,11 @@ import {
 import { RouterOutlet } from '@angular/router';
 import { AuthActions } from '@auth';
 import { Store } from '@ngrx/store';
+import { HeaderComponent } from './components/header/header.component';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, HeaderComponent],
   templateUrl: './layout.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

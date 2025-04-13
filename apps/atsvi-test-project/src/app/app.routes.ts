@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import artistsRoutes from './pages/artists/artists.routes';
+import { DashboardsComponent } from './pages/dashboards/containers/dashboards/dashboards.component';
 import { LayoutComponent } from './pages/layout/layout.component';
 
 export const routes: Routes = [
@@ -15,6 +16,10 @@ export const routes: Routes = [
       {
         path: '',
         loadChildren: () => artistsRoutes,
+      },
+      {
+        path: 'dashboards',
+        loadComponent: () => DashboardsComponent,
       },
     ],
   },
