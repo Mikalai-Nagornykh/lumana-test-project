@@ -1,16 +1,15 @@
 <div class="w-full h-full">
   <div class="flex flex-wrap gap-2 mb-4">
     @for (option of filterOptions; track $index) {
-      <button
-        (click)="selectedType = option"
-        [ngClass]="{
-      'bg-blue-600 text-white': selectedType.type === option.type,
-      'bg-gray-700 text-gray-300 hover:bg-gray-600': selectedType.type !== option.type
-    }"
-        class="px-4 py-2 rounded-lg text-sm transition-colors duration-200 hover:cursor-pointer"
-      >
-        {{ option.label }}
-      </button>
+    <button
+      (click)="toggleFilter(option)"
+      [ngClass]="{
+        'bg-blue-600 text-white': isSelected(option),
+        'bg-gray-700 text-gray-300 hover:bg-gray-600': !isSelected(option)
+      }"
+      class="px-4 py-2 rounded-lg text-sm transition-colors duration-200 hover:cursor-pointer">
+      {{ option.label }}
+    </button>
     }
     <button
       class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -23,6 +22,6 @@
           [type]="'line'"
           [data]="lineChartData"
           [options]="lineChartOptions"
-          [legend]="lineChartLegend">
+          [legend]="true">
   </canvas>
 </div>

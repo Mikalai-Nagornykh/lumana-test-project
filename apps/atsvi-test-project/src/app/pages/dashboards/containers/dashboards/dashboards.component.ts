@@ -2,30 +2,23 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   OnDestroy,
   OnInit,
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WebSocketService } from '@services';
-import { initExampleRust, moving_average } from '@wasm-moving-average';
+import { initRustFunctions } from '@wasm-moving-average';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
 import { format } from 'date-fns';
-
-type FilterType = 'MA' | 'MF' | 'EMA';
-
-interface FilterOption {
-  type: FilterType;
-  label: string;
-}
-
-const filterOptions: FilterOption[] = [
-  { type: 'MA', label: 'Moving Average' },
-  { type: 'MF', label: 'Median Filter' },
-  { type: 'EMA', label: 'Exponential Moving Average' },
-];
+import { BaseChartDirective } from 'ng2-charts';
+import {
+  filterOptions,
+  SmoothingMethod,
+} from '../../constants/smooth-options.constant';
 
 @Component({
   selector: 'app-dashboards',
@@ -37,25 +30,11 @@ export class DashboardsComponent implements OnInit, OnDestroy {
   private chart = viewChild(BaseChartDirective);
 
   private webSocketService = inject(WebSocketService);
+  private destroyRef = inject(DestroyRef);
 
   public lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
-    datasets: [
-      {
-        label: 'Raw Data',
-        data: [],
-        fill: false,
-        borderColor: 'rgba(255, 99, 132, 1)',
-        tension: 0.4,
-      },
-      {
-        label: 'Smoothed',
-        data: [],
-        fill: false,
-        borderColor: 'rgba(54, 162, 235, 1)',
-        tension: 0.4,
-      },
-    ],
+    datasets: [],
   };
   protected lineChartOptions: ChartOptions<'line'> = {
     responsive: false,
@@ -106,14 +85,14 @@ export class DashboardsComponent implements OnInit, OnDestroy {
   };
 
   protected readonly filterOptions = filterOptions;
-  protected readonly lineChartLegend = true;
 
-  protected selectedType = filterOptions[0];
+  protected selectedTypes = signal<SmoothingMethod[]>([filterOptions[0]]);
   protected freezeMode = signal<boolean>(false);
 
   private rawData: { time: Date; value: number }[] = [];
   private maxPoints = 50;
   private windowSize = 5;
+  private alpha = 0.5;
   private initialized = false;
 
   constructor() {
@@ -121,41 +100,90 @@ export class DashboardsComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    await initExampleRust();
+    await initRustFunctions();
     this.initialized = true;
 
-    this.webSocketService.messages$.subscribe((msg) => {
-      const value = Number(msg);
-      if (isNaN(value)) return;
+    this.webSocketService.messages$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((msg) => {
+        const value = Number(msg);
+        if (isNaN(value)) return;
 
-      this.handleIncomingValue(value);
-    });
+        this.handleIncomingValue(value);
+      });
+  }
+
+  protected isSelected(option: SmoothingMethod): boolean {
+    return this.selectedTypes().some((t) => t.type === option.type);
+  }
+
+  protected toggleFilter(option: SmoothingMethod): void {
+    const current = this.selectedTypes();
+    const exists = current.find((o) => o.type === option.type);
+
+    if (exists) {
+      this.selectedTypes.set(current.filter((o) => o.type !== option.type));
+    } else {
+      this.selectedTypes.set([...current, option]);
+    }
   }
 
   private handleIncomingValue(value: number) {
     if (!this.initialized) return;
 
     const now = new Date();
-
     this.rawData.push({ time: now, value });
 
     if (this.rawData.length > this.maxPoints) {
       this.rawData.shift();
     }
 
-    if (!this.freezeMode()) {
-      const times = this.rawData.map((d) => format(d.time, 'HH:mm:ss'));
-      const values = this.rawData.map((d) => d.value);
+    if (this.freezeMode()) return;
 
-      // @ts-ignore
-      const smoothed = moving_average(values, this.windowSize);
+    this.changeDataSet();
+  }
 
-      this.lineChartData.labels = [...times];
-      this.lineChartData.datasets[0].data = [...values];
-      this.lineChartData.datasets[1].data = [...smoothed];
+  private changeDataSet(): void {
+    const times = this.rawData.map((d) => format(d.time, 'HH:mm:ss'));
+    const values = this.rawData.map((d) => d.value);
 
-      this.chart()?.update();
+    this.lineChartData.labels = [...times];
+
+    if (this.lineChartData.datasets.length === 0) {
+      this.lineChartData.datasets.push({
+        label: 'Raw Data',
+        data: [],
+        fill: false,
+        borderColor: 'rgba(255, 99, 132, 1)',
+        tension: 0.4,
+      });
     }
+
+    this.lineChartData.datasets[0].data = [...values];
+
+    this.selectedTypes().forEach((option, index) => {
+      const fn = option.fn;
+      const param = option.type === 'EMA' ? this.alpha : this.windowSize;
+      const smoothed = fn(values, param);
+
+      const datasetIndex = index + 1;
+
+      if (!this.lineChartData.datasets[datasetIndex]) {
+        this.lineChartData.datasets[datasetIndex] = {
+          label: option.label,
+          data: [],
+          fill: false,
+          borderColor: option.color,
+          tension: 0.4,
+        };
+      }
+
+      this.lineChartData.datasets[datasetIndex].data = smoothed;
+    });
+
+    this.lineChartData.datasets.length = this.selectedTypes().length + 1;
+
+    this.chart()?.update();
   }
 
   ngOnDestroy() {
