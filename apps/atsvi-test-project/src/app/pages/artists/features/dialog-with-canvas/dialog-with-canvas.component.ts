@@ -123,6 +123,80 @@ export class DialogWithCanvasComponent {
     this.polygonsCollection = [...newPolygons];
   }
 
+  protected async downloadAllImageWithPolygons(
+    canvas: HTMLCanvasElement,
+  ): Promise<void> {
+    const bgUrl = this.artist().images[0]?.url || 'empty-artist-image.jpg';
+    if (!bgUrl) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const tempCanvas = this.document.createElement('canvas');
+    tempCanvas.width = width;
+    tempCanvas.height = height;
+
+    const tempCtx = tempCanvas.getContext('2d');
+    if (!tempCtx) return;
+
+    const bgImage = await CanvasHelper.loadImage(bgUrl);
+    const { drawWidth, drawHeight, offsetX, offsetY } =
+      CanvasHelper.getCoverDrawParams(
+        width,
+        height,
+        bgImage.width,
+        bgImage.height,
+      );
+
+    tempCtx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+    tempCtx.drawImage(canvas, 0, 0);
+
+    const dataUrl = tempCanvas.toDataURL('image/png');
+    const link = this.document.createElement('a');
+    link.href = dataUrl;
+    link.download = 'canvas-images.png';
+    link.click();
+  }
+
+  protected async downloadClippedImagesByPolygonsWithoutAngles(
+    canvas: HTMLCanvasElement,
+  ): Promise<void> {
+    const bgUrl = this.artist().images[0]?.url || 'empty-artist-image.jpg';
+    if (!bgUrl) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    const tempCanvas = this.document.createElement('canvas');
+    tempCanvas.width = width;
+    tempCanvas.height = height;
+
+    const ctx = tempCanvas.getContext('2d');
+    if (!ctx) return;
+
+    const bgImage = await CanvasHelper.loadImage(bgUrl);
+    const { drawWidth, drawHeight, offsetX, offsetY } =
+      CanvasHelper.getCoverDrawParams(
+        width,
+        height,
+        bgImage.width,
+        bgImage.height,
+      );
+
+    const clipPath = CanvasHelper.toPath(this.polygonsCollection);
+    ctx.save();
+    ctx.clip(clipPath);
+
+    ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+    ctx.restore();
+
+    const dataUrl = tempCanvas.toDataURL('image/png');
+    const link = this.document.createElement('a');
+    link.href = dataUrl;
+    link.download = 'clipped-image.png';
+    link.click();
+  }
+
   protected onSave(): void {
     this.savePolygonsEmit.emit(this.polygonsCollection);
   }

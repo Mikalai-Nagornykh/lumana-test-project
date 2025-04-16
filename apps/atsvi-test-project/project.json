@@ -18,6 +18,10 @@
           {
             "glob": "**/*",
             "input": "libs/rust-moving-average/pkg"
+          },
+          {
+            "glob": "**/*",
+            "input": "apps/atsvi-test-project/public"
           }
         ],
         "styles": ["apps/atsvi-test-project/src/styles.css"],

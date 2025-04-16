@@ -63,6 +63,59 @@ export class CanvasHelper {
     context.setLineDash([]);
   }
 
+  static getCoverDrawParams(
+    canvasWidth: number,
+    canvasHeight: number,
+    imageWidth: number,
+    imageHeight: number,
+  ): {
+    drawWidth: number;
+    drawHeight: number;
+    offsetX: number;
+    offsetY: number;
+  } {
+    const canvasAspect = canvasWidth / canvasHeight;
+    const imageAspect = imageWidth / imageHeight;
+
+    let drawWidth = canvasWidth;
+    let drawHeight = canvasHeight;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (imageAspect > canvasAspect) {
+      drawWidth = canvasHeight * imageAspect;
+      offsetX = (canvasWidth - drawWidth) / 2;
+    } else {
+      drawHeight = canvasWidth / imageAspect;
+      offsetY = (canvasHeight - drawHeight) / 2;
+    }
+
+    return { drawWidth, drawHeight, offsetX, offsetY };
+  }
+
+  static toPath(polygons: Polygon[]): Path2D {
+    const path = new Path2D();
+    polygons.forEach((polygon) => {
+      if (!polygon.points.length) return;
+      path.moveTo(polygon.points[0].x, polygon.points[0].y);
+      for (let i = 1; i < polygon.points.length; i++) {
+        path.lineTo(polygon.points[i].x, polygon.points[i].y);
+      }
+      path.closePath();
+    });
+    return path;
+  }
+
+  static loadImage(url: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = url;
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+    });
+  }
+
   public init(): void {
     this.initializeCanvas();
     this.setCanvasBackground();
