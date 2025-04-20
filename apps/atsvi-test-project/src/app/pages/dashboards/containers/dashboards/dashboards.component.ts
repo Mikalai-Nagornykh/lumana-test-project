@@ -17,7 +17,7 @@ import { format } from 'date-fns';
 import { BaseChartDirective } from 'ng2-charts';
 import {
   filterOptions,
-  SmoothingMethod,
+  LineChartDatasetExtra,
 } from '../../constants/smooth-options.constant';
 
 @Component({
@@ -86,7 +86,7 @@ export class DashboardsComponent implements OnInit, OnDestroy {
 
   protected readonly filterOptions = filterOptions;
 
-  protected selectedTypes = signal<SmoothingMethod[]>([filterOptions[0]]);
+  protected selectedTypes = signal<LineChartDatasetExtra[]>([filterOptions[0]]);
   protected freezeMode = signal<boolean>(false);
 
   private rawData: { time: Date; value: number }[] = [];
@@ -113,11 +113,11 @@ export class DashboardsComponent implements OnInit, OnDestroy {
       });
   }
 
-  protected isSelected(option: SmoothingMethod): boolean {
+  protected isSelected(option: LineChartDatasetExtra): boolean {
     return this.selectedTypes().some((t) => t.type === option.type);
   }
 
-  protected toggleFilter(option: SmoothingMethod): void {
+  protected toggleFilter(option: LineChartDatasetExtra): void {
     const current = this.selectedTypes();
     const exists = current.find((o) => o.type === option.type);
 
@@ -151,7 +151,7 @@ export class DashboardsComponent implements OnInit, OnDestroy {
 
     if (this.lineChartData.datasets.length === 0) {
       this.lineChartData.datasets.push({
-        label: 'Raw Data',
+        label: 'Initial',
         data: [],
         fill: false,
         borderColor: 'rgba(255, 99, 132, 1)',
@@ -161,27 +161,37 @@ export class DashboardsComponent implements OnInit, OnDestroy {
 
     this.lineChartData.datasets[0].data = [...values];
 
-    this.selectedTypes().forEach((option, index) => {
+    this.selectedTypes().forEach((option) => {
+      const existing = this.lineChartData.datasets.find(
+        (ds) => ds.label === option.label,
+      );
       const fn = option.fn;
+
+      if (!fn) {
+        return;
+      }
+
       const param = option.type === 'EMA' ? this.alpha : this.windowSize;
       const smoothed = fn(values, param);
 
-      const datasetIndex = index + 1;
-
-      if (!this.lineChartData.datasets[datasetIndex]) {
-        this.lineChartData.datasets[datasetIndex] = {
+      if (existing) {
+        existing.data = smoothed;
+      } else {
+        this.lineChartData.datasets.push({
           label: option.label,
-          data: [],
-          fill: false,
-          borderColor: option.color,
-          tension: 0.4,
-        };
+          data: smoothed,
+          fill: option.fill,
+          borderColor: option.borderColor,
+          tension: option.tension,
+        });
       }
-
-      this.lineChartData.datasets[datasetIndex].data = smoothed;
     });
 
-    this.lineChartData.datasets.length = this.selectedTypes().length + 1;
+    this.lineChartData.datasets = this.lineChartData.datasets.filter(
+      (ds) =>
+        ds.label === 'Initial' ||
+        this.selectedTypes().some((option) => option.label === ds.label),
+    );
 
     this.chart()?.update();
   }
