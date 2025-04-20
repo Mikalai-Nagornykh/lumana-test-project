@@ -20,21 +20,30 @@ export const filterOptions: SmoothingMethod[] = [
     type: 'MA',
     label: 'Moving Average',
     color: 'rgba(54, 162, 235, 1)',
-    // @ts-ignore
-    fn: moving_average as SmoothingFn,
+    fn: (data, window_size) => {
+      const typedArray = new Float64Array(data);
+      const result = moving_average(typedArray, window_size);
+      return Array.from(result);
+    },
   },
   {
     type: 'MF',
     label: 'Median Filter',
     color: 'rgba(255, 206, 86, 1)',
-    // @ts-ignore
-    fn: median_filter as SmoothingFn,
+    fn: (data, window_size) => {
+      const typedArray = new Float64Array(data);
+      const result = median_filter(typedArray, window_size);
+      return Array.from(result);
+    },
   },
   {
     type: 'EMA',
     label: 'Exponential Moving Average',
     color: 'rgba(75, 192, 192, 1)',
-    // @ts-ignore
-    fn: exponential_moving_average as SmoothingFn,
+    fn: (data, alpha) => {
+      const typedArray = new Float64Array(data);
+      const result = exponential_moving_average(typedArray, alpha);
+      return Array.from(result);
+    },
   },
 ];
