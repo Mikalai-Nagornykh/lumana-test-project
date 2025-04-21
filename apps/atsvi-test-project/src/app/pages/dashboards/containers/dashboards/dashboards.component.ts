@@ -143,7 +143,7 @@ export class DashboardsComponent implements OnInit, OnDestroy {
     this.changeDataSet();
   }
 
-  private changeDataSet(): void {
+  private async changeDataSet(): Promise<void> {
     const times = this.rawData.map((d) => format(d.time, 'HH:mm:ss'));
     const values = this.rawData.map((d) => d.value);
 
@@ -161,18 +161,18 @@ export class DashboardsComponent implements OnInit, OnDestroy {
 
     this.lineChartData.datasets[0].data = [...values];
 
-    this.selectedTypes().forEach((option) => {
+    const selected = this.selectedTypes();
+
+    for (const option of selected) {
       const existing = this.lineChartData.datasets.find(
         (ds) => ds.label === option.label,
       );
       const fn = option.fn;
 
-      if (!fn) {
-        return;
-      }
+      if (!fn) continue;
 
       const param = option.type === 'EMA' ? this.alpha : this.windowSize;
-      const smoothed = fn(values, param);
+      const smoothed = await fn(values, param);
 
       if (existing) {
         existing.data = smoothed;
@@ -185,12 +185,12 @@ export class DashboardsComponent implements OnInit, OnDestroy {
           tension: option.tension,
         });
       }
-    });
+    }
 
     this.lineChartData.datasets = this.lineChartData.datasets.filter(
       (ds) =>
         ds.label === 'Initial' ||
-        this.selectedTypes().some((option) => option.label === ds.label),
+        selected.some((option) => option.label === ds.label),
     );
 
     this.chart()?.update();

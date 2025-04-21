@@ -26,7 +26,7 @@
       "@models": ["apps/atsvi-test-project/src/app/models/index"],
       "@services": ["apps/atsvi-test-project/src/app/services/index"],
       "@store": ["apps/atsvi-test-project/src/app/store/index"],
-      "@wasm-moving-average": ["libs/rust-moving-average/src/public-api.ts"],
+      "@wasm-moving-average": ["libs/rust-moving-average/src/public-api.ts"]
     },
     "rootDir": "."
   },

@@ -2,9 +2,9 @@
   "name": "atsvi-test-project",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "generators": {},
   "sourceRoot": "apps/atsvi-test-project/src",
   "prefix": "app",
+  "generators": {},
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
@@ -25,7 +25,8 @@
           }
         ],
         "styles": ["apps/atsvi-test-project/src/styles.css"],
-        "scripts": []
+        "scripts": [],
+        "webWorkerTsConfig": "apps/atsvi-test-project/tsconfig.worker.json"
       },
       "configurations": {
         "production": {
@@ -84,7 +85,8 @@
           }
         ],
         "styles": ["apps/atsvi-test-project/src/styles.css"],
-        "scripts": []
+        "scripts": [],
+        "webWorkerTsConfig": "apps/atsvi-test-project/tsconfig.worker.json"
       }
     }
   }
